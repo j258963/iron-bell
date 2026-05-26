@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<title>IRON BELL</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{background:#080808;color:white;font-family:'DM Sans',sans-serif;overscroll-behavior:none;}
+  button{cursor:pointer;font-family:inherit;}
+  ::-webkit-scrollbar{display:none;}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+const CIRCUITS = [
+  {
+    id:"A", name:"Circuit A", subtitle:"Power & Pull",
+    color:"#FF4500", glow:"rgba(255,69,0,0.18)",
+    exercises:[
+      {name:"KB Renegade Row",icon:"🔥"},
+      {name:"KB Push-Ups",icon:"💪"},
+      {name:"Shoulder Press + Jacks",icon:"⚡"},
+      {name:"KB Swing Squats",icon:"🏋️"},
+    ],
+    rounds:3, workTime:60, exRest:15, roundRest:60,
+  },
+  {
+    id:"B", name:"Circuit B", subtitle:"Burn & Build",
+    color:"#FFB800", glow:"rgba(255,184,0,0.18)",
+    exercises:[
+      {name:"Double KB Clean & Press",icon:"🔥"},
+      {name:"KB Thruster",icon:"💀"},
+      {name:"KB Swing",icon:"⚡"},
+      {name:"Goblet Squat",icon:"🏋️"},
+    ],
+    rounds:3, workTime:60, exRest:15, roundRest:60,
+  },
+  {
+    id:"C", name:"Circuit C", subtitle:"Grind & Shred",
+    color:"#00C2FF", glow:"rgba(0,194,255,0.18)",
+    exercises:[
+      {name:"KB Snatch (Alt)",icon:"🔥"},
+      {name:"KB Deadlift",icon:"🏋️"},
+      {name:"KB Front Rack Lunge",icon:"💪"},
+      {name:"KB Windmill",icon:"🌀"},
+    ],
+    rounds:3, workTime:60, exRest:15, roundRest:60,
+  },
+];
+
+const WARMUP = [
+  {name:"Hip Circles",detail:"30 sec each side · loosen hip flexors",icon:"🔄"},
+  {name:"Leg Swings",detail:"20 reps each leg · dynamic hamstring",icon:"🦵"},
+  {name:"Arm Circles + Shoulder Rolls",detail:"30 sec · prep rotator cuff",icon:"💪"},
+  {name:"Light KB Swing (empty hand)",detail:"15 reps · groove hinge pattern",icon:"🏃"},
+  {name:"Deep Squat Hold",detail:"30 sec · ankle + hip mobility",icon:"🧘"},
+];
+
+const fmtTime = s=>`${String(Math.floor(s/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`;
+const circumference = 2*Math.PI*88;
+
+// ── TIMER ─────────────────────────────────────────────────────────────────
+function Timer({circuit, onClose, onComplete}){
+  const [phase,setPhase]=useState("warmup");
+  const [timeLeft,setTimeLeft]=useState(180);
+  const [round,setRound]=useState(1);
+  const [exIdx,setExIdx]=useState(0);
+  const [running,setRunning]=useState(false);
+  const [countdown,setCountdown]=useState(3);
+  const [totalSets,setTotalSets]=useState(0);
+  const [elapsed,setElapsed]=useState(0);
+  const ivRef=useRef(null);
+  const elRef=useRef(null);
+
+  // refs to avoid stale closures
+  const phaseRef=useRef(phase);
+  const exIdxRef=useRef(exIdx);
+  const roundRef=useRef(round);
+  const countdownRef=useRef(countdown);
+  const totalSetsRef=useRef(totalSets);
+  const elapsedRef2=useRef(elapsed);
+
+  useEffect(()=>{phaseRef.current=phase;},[phase]);
+  useEffect(()=>{exIdxRef.current=exIdx;},[exIdx]);
+  useEffect(()=>{roundRef.current=round;},[round]);
+  useEffect(()=>{countdownRef.current=countdown;},[countdown]);
+  useEffect(()=>{totalSetsRef.current=totalSets;},[totalSets]);
+  useEffect(()=>{elapsedRef2.current=elapsed;},[elapsed]);
+
+  useEffect(()=>{
+    if(running){elRef.current=setInterval(()=>setElapsed(e=>e+1),1000);}
+    return()=>clearInterval(elRef.current);
+  },[running]);
+
+  const doSkip=()=>{
+    clearInterval(ivRef.current);
+    const ei=exIdxRef.current, totalEx=circuit.exercises.length;
+    const r=roundRef.current;
+    const nextEx=ei+1;
+    if(nextEx<totalEx){
+      setExIdx(nextEx); setPhase("ex-rest"); setTimeLeft(circuit.exRest);
+    } else {
+      const nextRound=r+1;
+      if(nextRound<=circuit.rounds){
+        setRound(nextRound); setExIdx(0); setPhase("round-rest"); setTimeLeft(circuit.roundRest);
+      } else {
+        setPhase("done"); setRunning(false);
+        onComplete&&onComplete({sets:totalSetsRef.current,minutes:Math.round(elapsedRef2.current/60)});
+      }
+    }
+  };
+
+  const doSkipWarmup=()=>{
+    clearInterval(ivRef.current);
+    setRunning(false); setPhase("get-ready"); setCountdown(3); setTimeLeft(3);
+  };
+
+  useEffect(()=>{
+    if(!running){clearInterval(ivRef.current);return;}
+    ivRef.current=setInterval(()=>{
+      setTimeLeft(t=>{
+        if(t>1) return t-1;
+        const ph=phaseRef.current;
+        if(ph==="warmup"){setPhase("get-ready");setCountdown(3);return 3;}
+        if(ph==="get-ready"){
+          if(countdownRef.current>1){setCountdown(c=>c-1);return 1;}
+          setPhase("work");return circuit.workTime;
+        }
+        if(ph==="work"){
+          setTotalSets(s=>s+1);
+          const nextEx=exIdxRef.current+1;
+          const totalEx=circuit.exercises.length;
+          if(nextEx<totalEx){setExIdx(nextEx);setPhase("ex-rest");return circuit.exRest;}
+          else{
+            const nextRound=roundRef.current+1;
+            if(nextRound<=circuit.rounds){setRound(nextRound);setExIdx(0);setPhase("round-rest");return circuit.roundRest;}
+            else{
+              setPhase("done");setRunning(false);
+              onComplete&&onComplete({sets:totalSetsRef.current+1,minutes:Math.round(elapsedRef2.current/60)});
+              return 0;
+            }
+          }
+        }
+        if(ph==="ex-rest"){setPhase("work");return circuit.workTime;}
+        if(ph==="round-rest"){setExIdx(0);setPhase("work");return circuit.workTime;}
+        return 0;
+      });
+    },1000);
+    return()=>clearInterval(ivRef.current);
+  },[running]);
+
+  const ex=circuit.exercises[exIdx];
+  const totalEx=circuit.exercises.length;
+
+  const phaseColor={
+    warmup:"#FFB800","get-ready":"#FF4500",work:circuit.color,
+    "ex-rest":"#444","round-rest":"#444",done:"#00ff64",
+  }[phase]||"#fff";
+
+  const phaseLabel={
+    warmup:"WARM UP","get-ready":"GET READY",work:"WORK",
+    "ex-rest":"REST","round-rest":"ROUND REST",done:"DONE",
+  }[phase]||phase.toUpperCase();
+
+  const maxTime={
+    warmup:180,"get-ready":3,work:circuit.workTime,
+    "ex-rest":circuit.exRest,"round-rest":circuit.roundRest,done:1,
+  }[phase]||1;
+
+  const progress=Math.max(0,Math.min(1,(maxTime-timeLeft)/maxTime));
+
+  return(
+    <div style={{position:"fixed",inset:0,background:"#060606",zIndex:200,display:"flex",flexDirection:"column",alignItems:"center",overflowY:"auto",fontFamily:"'Bebas Neue',sans-serif"}}>
+      {/* Top bar */}
+      <div style={{width:"100%",maxWidth:480,display:"flex",justifyContent:"space-between",alignItems:"center",padding:"52px 20px 20px"}}>
+        <div>
+          <div style={{fontSize:11,color:"#333",letterSpacing:4,fontFamily:"'DM Sans',sans-serif"}}>{circuit.name}</div>
+          <div style={{fontSize:22,color:"white",letterSpacing:3}}>{circuit.subtitle.toUpperCase()}</div>
+        </div>
+        <button onClick={onClose} style={{background:"rgba(255,255,255,0.07)",border:"none",color:"#888",width:44,height:44,borderRadius:"50%",fontSize:18}}>✕</button>
+      </div>
+
+      {phase==="done"?(
+        <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:32,textAlign:"center"}}>
+          <div style={{fontSize:80,marginBottom:8}}>🔥</div>
+          <div style={{fontSize:72,color:"white",letterSpacing:4}}>BEAST</div>
+          <div style={{fontSize:72,color:circuit.color,letterSpacing:4,marginBottom:8}}>MODE</div>
+          <div style={{fontSize:16,color:"#555",fontFamily:"'DM Sans',sans-serif",marginBottom:32}}>Session crushed.</div>
+          <div style={{display:"flex",gap:24,marginBottom:40}}>
+            {[["ROUNDS",circuit.rounds],["MINS",Math.round(elapsed/60)],["SETS",totalSets]].map(([l,v])=>(
+              <div key={l} style={{textAlign:"center"}}>
+                <div style={{fontSize:36,color:"white"}}>{v}</div>
+                <div style={{fontSize:11,color:"#444",letterSpacing:3,fontFamily:"'DM Sans',sans-serif"}}>{l}</div>
+              </div>
+            ))}
+          </div>
+          <button onClick={onClose} style={{padding:"14px 40px",background:circuit.color,border:"none",color:"white",fontSize:22,letterSpacing:3,borderRadius:14,fontFamily:"'Bebas Neue',sans-serif"}}>BACK TO PROGRAM</button>
+        </div>
+      ):(
+        <>
+          {/* Phase badge */}
+          <div style={{background:`${phaseColor}22`,border:`1px solid ${phaseColor}44`,borderRadius:10,padding:"6px 20px",fontSize:14,color:phaseColor,letterSpacing:4,marginBottom:28}}>{phaseLabel}</div>
+
+          {/* Ring */}
+          <div style={{position:"relative",width:210,height:210,marginBottom:24}}>
+            <svg width="210" height="210" style={{transform:"rotate(-90deg)"}}>
+              <circle cx="105" cy="105" r="88" fill="none" stroke="#1a1a1a" strokeWidth="10"/>
+              <circle cx="105" cy="105" r="88" fill="none" stroke={phaseColor} strokeWidth="10"
+                strokeDasharray={circumference} strokeDashoffset={circumference*(1-progress)}
+                strokeLinecap="round" style={{transition:"stroke-dashoffset 0.6s linear,stroke 0.3s"}}/>
+            </svg>
+            <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
+              {phase==="get-ready"
+                ?<div style={{fontSize:80,color:"white",lineHeight:1}}>{timeLeft}</div>
+                :<div style={{fontSize:60,color:"white",lineHeight:1}}>{fmtTime(timeLeft)}</div>
+              }
+              {phase==="work"&&<div style={{fontSize:13,color:"#555",marginTop:4,fontFamily:"'DM Sans',sans-serif"}}>R{round}/{circuit.rounds}</div>}
+            </div>
+          </div>
+
+          {/* Current exercise */}
+          {phase!=="warmup"&&phase!=="get-ready"&&(
+            <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:18,padding:"18px 32px",textAlign:"center",marginBottom:16,width:"100%",maxWidth:360}}>
+              <div style={{fontSize:11,color:"#333",letterSpacing:3,fontFamily:"'DM Sans',sans-serif",marginBottom:6}}>
+                {phase==="work"?`EXERCISE ${exIdx+1}/${totalEx}`:phase==="ex-rest"?"NEXT UP":"NEXT ROUND STARTING"}
+              </div>
+              <div style={{fontSize:26,color:"white",letterSpacing:2}}>
+                {ex.icon} {phase==="ex-rest"&&exIdx+1<totalEx?circuit.exercises[exIdx+1].name:ex.name}
+              </div>
+            </div>
+          )}
+
+          {/* Warmup list */}
+          {phase==="warmup"&&(
+            <div style={{width:"100%",maxWidth:400,padding:"0 20px",marginBottom:16}}>
+              {WARMUP.map((w,i)=>(
+                <div key={i} style={{display:"flex",gap:14,padding:"12px 0",borderBottom:i<WARMUP.length-1?"1px solid rgba(255,255,255,0.05)":"none",alignItems:"center"}}>
+                  <span style={{fontSize:22}}>{w.icon}</span>
+                  <div>
+                    <div style={{fontSize:15,color:"white",fontFamily:"'DM Sans',sans-serif",fontWeight:500}}>{w.name}</div>
+                    <div style={{fontSize:12,color:"#444",fontFamily:"'DM Sans',sans-serif"}}>{w.detail}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Progress dots */}
+          {(phase==="work"||phase==="ex-rest")&&(
+            <div style={{display:"flex",gap:8,marginBottom:20}}>
+              {circuit.exercises.map((_,i)=>(
+                <div key={i} style={{width:i===exIdx?24:8,height:8,borderRadius:4,background:i<=exIdx?circuit.color:"#222",transition:"all 0.3s"}}/>
+              ))}
+            </div>
+          )}
+
+          {/* Controls */}
+          <div style={{display:"flex",gap:14,marginTop:8}}>
+            <button onClick={()=>setRunning(r=>!r)} style={{padding:"16px 48px",borderRadius:14,background:running?"rgba(255,255,255,0.08)":circuit.color,border:running?"1px solid rgba(255,255,255,0.1)":"none",color:"white",fontSize:26,letterSpacing:4,fontFamily:"'Bebas Neue',sans-serif"}}>
+              {running?"⏸ PAUSE":phase==="warmup"?"START":"▶ RESUME"}
+            </button>
+            {phase==="warmup"&&(
+              <button onClick={doSkipWarmup} style={{padding:"16px 18px",borderRadius:14,background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.1)",color:"#888",fontSize:14,fontFamily:"'DM Sans',sans-serif",letterSpacing:2}}>SKIP ⏭</button>
+            )}
+            {(phase==="work"||phase==="ex-rest"||phase==="round-rest")&&(
+              <button onClick={doSkip} style={{padding:"16px 18px",borderRadius:14,background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.1)",color:"#888",fontSize:14,fontFamily:"'DM Sans',sans-serif",letterSpacing:2}}>SKIP →</button>
+            )}
+          </div>
+
+          <div style={{marginTop:28,fontSize:11,color:"#222",letterSpacing:2,fontFamily:"'DM Sans',sans-serif",textAlign:"center",padding:"0 20px"}}>
+            REST: 15 SEC EX · 1 MIN ROUND · 2 MIN CIRCUIT
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+// ── CIRCUIT CARD ──────────────────────────────────────────────────────────
+function CircuitCard({circuit,onStart}){
+  const [expanded,setExpanded]=useState(false);
+  return(
+    <div style={{background:"#0d0d0d",borderRadius:22,overflow:"hidden",marginBottom:14,border:"1px solid rgba(255,255,255,0.06)",boxShadow:`0 8px 40px ${circuit.glow}`}}>
+      <div style={{padding:"22px 22px 0",background:`linear-gradient(160deg,${circuit.glow} 0%,transparent 60%)`}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10}}>
+          <div style={{background:circuit.color,color:"#000",fontSize:13,fontWeight:800,padding:"4px 12px",borderRadius:8,letterSpacing:3,fontFamily:"'Bebas Neue',sans-serif"}}>CIRCUIT {circuit.id}</div>
+          <div style={{fontSize:11,color:"#444",letterSpacing:2,fontFamily:"'DM Sans',sans-serif"}}>{circuit.exercises.length} EX · {circuit.rounds} RDS</div>
+        </div>
+        <div style={{fontSize:30,color:"white",letterSpacing:2,fontFamily:"'Bebas Neue',sans-serif",lineHeight:1.1}}>{circuit.subtitle.toUpperCase()}</div>
+        <div style={{display:"flex",gap:10,marginTop:14,marginBottom:16,flexWrap:"wrap"}}>
+          {[{l:"WORK",v:`${circuit.workTime}s`},{l:"EX-REST",v:`${circuit.exRest}s`},{l:"RD-REST",v:`${circuit.roundRest}s`}].map(c=>(
+            <div key={c.l} style={{background:"rgba(255,255,255,0.04)",borderRadius:8,padding:"6px 14px",display:"flex",gap:8,alignItems:"center"}}>
+              <span style={{fontSize:10,color:"#444",letterSpacing:2,fontFamily:"'DM Sans',sans-serif"}}>{c.l}</span>
+              <span style={{fontSize:16,color:"white",fontFamily:"'Bebas Neue',sans-serif"}}>{c.v}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+      {expanded&&(
+        <div style={{padding:"0 22px 8px"}}>
+          <div style={{height:1,background:"rgba(255,255,255,0.05)",marginBottom:14}}/>
+          {circuit.exercises.map((ex,i)=>(
+            <div key={i} style={{display:"flex",alignItems:"center",gap:14,padding:"11px 0",borderBottom:i<circuit.exercises.length-1?"1px solid rgba(255,255,255,0.04)":"none"}}>
+              <div style={{width:32,height:32,borderRadius:10,background:`${circuit.color}22`,border:`1px solid ${circuit.color}44`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:16}}>{ex.icon}</div>
+              <div style={{fontSize:15,color:"white",fontFamily:"'DM Sans',sans-serif",fontWeight:500}}>{ex.name}</div>
+              <div style={{marginLeft:"auto",fontSize:11,color:"#333",fontFamily:"'DM Sans',sans-serif"}}>{circuit.workTime}s</div>
+            </div>
+          ))}
+        </div>
+      )}
+      <div style={{display:"flex",borderTop:"1px solid rgba(255,255,255,0.05)"}}>
+        <button onClick={()=>setExpanded(e=>!e)} style={{flex:1,padding:"14px",background:"transparent",border:"none",color:"#444",fontSize:11,letterSpacing:2,fontFamily:"'DM Sans',sans-serif"}}>
+          {expanded?"HIDE ▲":"EXERCISES ▼"}
+        </button>
+        <button onClick={()=>onStart(circuit)} style={{flex:2,padding:"14px",background:circuit.color,border:"none",color:"#000",fontSize:18,letterSpacing:3,fontFamily:"'Bebas Neue',sans-serif",fontWeight:800}}>START →</button>
+      </div>
+    </div>
+  );
+}
+
+// ── STATS ─────────────────────────────────────────────────────────────────
+function StatsTab({stats}){
+  const thisWeek=stats.sessions.slice(-7);
+  const maxSets=Math.max(...thisWeek.map(s=>s.sets),1);
+  return(
+    <div style={{padding:"0 16px 100px"}}>
+      <div style={{fontSize:36,color:"white",fontFamily:"'Bebas Neue',sans-serif",letterSpacing:4,marginBottom:4}}>YOUR STATS</div>
+      <div style={{fontSize:12,color:"#333",letterSpacing:3,fontFamily:"'DM Sans',sans-serif",marginBottom:24}}>ALL TIME</div>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:24}}>
+        {[{l:"SESSIONS DONE",v:stats.totalSessions,icon:"🏋️"},{l:"DAY STREAK 🔥",v:stats.streak,icon:"📅"},{l:"TOTAL SETS",v:stats.totalSets,icon:"⚡"},{l:"TOTAL MINUTES",v:stats.totalMinutes,icon:"⏱️"}].map(s=>(
+          <div key={s.l} style={{background:"#0d0d0d",borderRadius:18,padding:"20px",border:"1px solid rgba(255,255,255,0.05)"}}>
+            <div style={{fontSize:28,marginBottom:4}}>{s.icon}</div>
+            <div style={{fontSize:40,color:"white",fontFamily:"'Bebas Neue',sans-serif",lineHeight:1}}>{s.v}</div>
+            <div style={{fontSize:10,color:"#333",letterSpacing:2,marginTop:4,fontFamily:"'DM Sans',sans-serif"}}>{s.l}</div>
+          </div>
+        ))}
+      </div>
+      <div style={{background:"#0d0d0d",borderRadius:18,padding:"20px",border:"1px solid rgba(255,255,255,0.05)",marginBottom:20}}>
+        <div style={{fontSize:14,color:"#444",letterSpacing:3,fontFamily:"'DM Sans',sans-serif",marginBottom:16}}>THIS WEEK</div>
+        {thisWeek.length===0
+          ?<div style={{fontSize:13,color:"#333",fontFamily:"'DM Sans',sans-serif"}}>No sessions yet — get after it! 🔥</div>
+          :<div style={{display:"flex",gap:8,alignItems:"flex-end",height:80}}>
+            {thisWeek.map((s,i)=>(
+              <div key={i} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:4}}>
+                <div style={{width:"100%",background:"#FF4500",borderRadius:4,height:`${Math.round((s.sets/maxSets)*64)+4}px`}}/>
+                <div style={{fontSize:9,color:"#333",fontFamily:"'DM Sans',sans-serif"}}>{new Date(s.date).toLocaleDateString("en",{weekday:"short"}).toUpperCase()}</div>
+              </div>
+            ))}
+          </div>
+        }
+      </div>
+      <div style={{fontSize:14,color:"#333",letterSpacing:3,fontFamily:"'DM Sans',sans-serif",marginBottom:12}}>RECENT SESSIONS</div>
+      {stats.sessions.length===0
+        ?<div style={{background:"#0d0d0d",borderRadius:18,padding:"24px",border:"1px solid rgba(255,255,255,0.05)",textAlign:"center",fontSize:13,color:"#333",fontFamily:"'DM Sans',sans-serif"}}>Complete a session to see history here</div>
+        :[...stats.sessions].reverse().slice(0,5).map((s,i)=>(
+          <div key={i} style={{background:"#0d0d0d",borderRadius:14,padding:"16px 20px",border:"1px solid rgba(255,255,255,0.05)",marginBottom:10,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+            <div>
+              <div style={{fontSize:16,color:"white",fontFamily:"'Bebas Neue',sans-serif",letterSpacing:2}}>{s.label}</div>
+              <div style={{fontSize:11,color:"#444",fontFamily:"'DM Sans',sans-serif",marginTop:2}}>{new Date(s.date).toLocaleDateString("en",{month:"short",day:"numeric"})}</div>
+            </div>
+            <div style={{textAlign:"right"}}>
+              <div style={{fontSize:20,color:"#FF4500",fontFamily:"'Bebas Neue',sans-serif"}}>{s.sets} SETS</div>
+              <div style={{fontSize:11,color:"#333",fontFamily:"'DM Sans',sans-serif"}}>{s.minutes} MIN</div>
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  );
+}
+
+// ── APP ───────────────────────────────────────────────────────────────────
+function App(){
+  const [tab,setTab]=useState("home");
+  const [activeCircuit,setActiveCircuit]=useState(null);
+  const [fullSession,setFullSession]=useState(false);
+  const [fullIdx,setFullIdx]=useState(0);
+  const [stats,setStats]=useState({totalSessions:0,streak:0,totalSets:0,totalMinutes:0,sessions:[]});
+  const [streakToday,setStreakToday]=useState(false);
+
+  const handleComplete=(circuit,result)=>{
+    const todayStr=new Date().toDateString();
+    setStats(prev=>{
+      const isNewDay=prev.sessions.length===0||new Date(prev.sessions[prev.sessions.length-1].date).toDateString()!==todayStr;
+      return{
+        totalSessions:prev.totalSessions+1,
+        streak:isNewDay&&!streakToday?prev.streak+1:prev.streak,
+        totalSets:prev.totalSets+result.sets,
+        totalMinutes:prev.totalMinutes+result.minutes,
+        sessions:[...prev.sessions,{label:`${circuit.name} — ${circuit.subtitle}`,date:new Date().toISOString(),sets:result.sets,minutes:result.minutes}],
+      };
+    });
+    if(!streakToday)setStreakToday(true);
+    setActiveCircuit(null);
+    if(fullSession&&fullIdx<CIRCUITS.length-1){
+      setTimeout(()=>{const ni=fullIdx+1;setFullIdx(ni);setActiveCircuit(CIRCUITS[ni]);},400);
+    } else {
+      setFullSession(false);setFullIdx(0);
+    }
+  };
+
+  const startFull=()=>{setFullSession(true);setFullIdx(0);setActiveCircuit(CIRCUITS[0]);};
+
+  return(
+    <div style={{minHeight:"100vh",background:"#080808",fontFamily:"'DM Sans',sans-serif",maxWidth:480,margin:"0 auto",position:"relative"}}>
+
+      {activeCircuit&&<Timer circuit={activeCircuit} onClose={()=>{setActiveCircuit(null);setFullSession(false);setFullIdx(0);}} onComplete={r=>handleComplete(activeCircuit,r)}/>}
+
+      {/* HEADER */}
+      <div style={{padding:"52px 20px 20px",background:"linear-gradient(180deg,#111 0%,#080808 100%)",position:"sticky",top:0,zIndex:100,borderBottom:"1px solid rgba(255,255,255,0.05)"}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          <div>
+            <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:2}}>
+              <div style={{width:8,height:8,borderRadius:"50%",background:"#FF4500",boxShadow:"0 0 8px #FF4500"}}/>
+              <span style={{fontSize:10,color:"#FF4500",letterSpacing:4,fontFamily:"'DM Sans',sans-serif"}}>⚡ ELITE</span>
+            </div>
+            <div style={{fontSize:40,color:"white",fontFamily:"'Bebas Neue',sans-serif",letterSpacing:5,lineHeight:1}}>IRON BELL</div>
+          </div>
+          <div style={{textAlign:"right",background:"rgba(255,69,0,0.08)",border:"1px solid rgba(255,69,0,0.2)",borderRadius:14,padding:"10px 16px"}}>
+            <div style={{fontSize:24,color:"white",fontFamily:"'Bebas Neue',sans-serif"}}>🔥 {stats.streak}</div>
+            <div style={{fontSize:10,color:"#444",letterSpacing:2,fontFamily:"'DM Sans',sans-serif"}}>DAY STREAK</div>
+          </div>
+        </div>
+      </div>
+
+      {/* CONTENT */}
+      <div style={{paddingBottom:100}}>
+        {tab==="home"&&(
+          <div style={{padding:"24px 16px 0"}}>
+            {/* Hero */}
+            <div style={{background:"linear-gradient(135deg,#111 0%,#0d0d0d 100%)",borderRadius:22,padding:"24px",marginBottom:24,border:"1px solid rgba(255,255,255,0.06)",position:"relative",overflow:"hidden"}}>
+              <div style={{position:"absolute",top:-30,right:-30,width:140,height:140,borderRadius:"50%",background:"radial-gradient(circle,rgba(255,69,0,0.12) 0%,transparent 70%)"}}/>
+              <div style={{fontSize:11,color:"#444",letterSpacing:4,marginBottom:8,fontFamily:"'DM Sans',sans-serif"}}>ELITE KETTLEBELL PROTOCOL</div>
+              <div style={{fontSize:26,color:"white",fontFamily:"'Bebas Neue',sans-serif",letterSpacing:3,marginBottom:6}}>3-CIRCUIT ADVANCED PROGRAM</div>
+              <div style={{fontSize:13,color:"#555",fontFamily:"'DM Sans',sans-serif",marginBottom:20,lineHeight:1.6}}>Fat loss + muscle hypertrophy. 3 circuits, 3 rounds each.</div>
+              <div style={{display:"flex",gap:20,marginBottom:20}}>
+                {[["SESSIONS",stats.totalSessions],["TOTAL SETS",stats.totalSets],["MINUTES",stats.totalMinutes]].map(([l,v])=>(
+                  <div key={l}>
+                    <div style={{fontSize:28,color:"white",fontFamily:"'Bebas Neue',sans-serif"}}>{v}</div>
+                    <div style={{fontSize:10,color:"#333",letterSpacing:2,fontFamily:"'DM Sans',sans-serif"}}>{l}</div>
+                  </div>
+                ))}
+              </div>
+              <button onClick={startFull} style={{width:"100%",padding:"16px",background:"#FF4500",border:"none",color:"white",fontSize:22,letterSpacing:4,borderRadius:14,fontFamily:"'Bebas Neue',sans-serif"}}>▶ START FULL SESSION</button>
+            </div>
+
+            {/* Load guide */}
+            <div style={{background:"rgba(255,184,0,0.06)",border:"1px solid rgba(255,184,0,0.15)",borderRadius:14,padding:"14px 18px",marginBottom:24,fontSize:12,color:"#886600",fontFamily:"'DM Sans',sans-serif",lineHeight:1.7}}>
+              <span style={{color:"#FFB800",fontWeight:600}}>LOAD: </span>Men 16–24 kg · Women 12–16 kg
+              &nbsp;&nbsp;|&nbsp;&nbsp;
+              <span style={{color:"#FFB800",fontWeight:600}}>REST: </span>15 sec ex · 1 min round · 2 min circuit
+            </div>
+
+            <div style={{fontSize:12,color:"#333",letterSpacing:4,marginBottom:16,fontFamily:"'DM Sans',sans-serif"}}>TODAY'S CIRCUITS</div>
+            {CIRCUITS.map(c=><CircuitCard key={c.id} circuit={c} onStart={setActiveCircuit}/>)}
+          </div>
+        )}
+        {tab==="stats"&&<StatsTab stats={stats}/>}
+      </div>
+
+      {/* BOTTOM NAV */}
+      <div style={{position:"fixed",bottom:0,left:"50%",transform:"translateX(-50%)",width:"100%",maxWidth:480,background:"rgba(6,6,6,0.96)",backdropFilter:"blur(24px)",borderTop:"1px solid rgba(255,255,255,0.05)",display:"flex",padding:"14px 0 28px"}}>
+        {[{id:"home",label:"HOME",icon:"🏠"},{id:"stats",label:"STATS",icon:"📊"}].map(t=>(
+          <button key={t.id} onClick={()=>setTab(t.id)} style={{flex:1,background:"transparent",border:"none",color:tab===t.id?"#FF4500":"#2a2a2a",display:"flex",flexDirection:"column",alignItems:"center",gap:5}}>
+            <span style={{fontSize:24}}>{t.icon}</span>
+            <span style={{fontSize:10,letterSpacing:3,fontFamily:"'DM Sans',sans-serif",fontWeight:600}}>{t.label}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
