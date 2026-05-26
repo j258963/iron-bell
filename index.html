@@ -27,10 +27,10 @@ const CIRCUITS = [
     id:"A", name:"Circuit A", subtitle:"Power & Pull",
     color:"#FF4500", glow:"rgba(255,69,0,0.18)",
     exercises:[
-      {name:"KB Renegade Row",icon:"🔥"},
       {name:"KB Push-Ups",icon:"💪"},
-      {name:"Shoulder Press + Jacks",icon:"⚡"},
-      {name:"KB Swing Squats",icon:"🏋️"},
+      {name:"KB Renegade Row",icon:"🔥"},
+      {name:"KB Press + Jumping Jacks",icon:"⚡"},
+      {name:"Shoulder Raise + Jumping Jacks",icon:"🏋️"},
     ],
     rounds:3, workTime:60, exRest:15, roundRest:60,
   },
@@ -68,6 +68,41 @@ const WARMUP = [
 
 const fmtTime = s=>`${String(Math.floor(s/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`;
 const circumference = 2*Math.PI*88;
+
+// ── SOUND ENGINE ────────────────────────────────────────────────────────────
+let _actx = null;
+function getCtx(){
+  if(!_actx) _actx = new(window.AudioContext||window.webkitAudioContext)();
+  if(_actx.state==="suspended") _actx.resume();
+  return _actx;
+}
+function beep(freq=880, dur=0.15, vol=0.5, type="sine"){
+  try{
+    const ctx = getCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = type; osc.frequency.value = freq;
+    gain.gain.setValueAtTime(vol, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+dur);
+    osc.start(ctx.currentTime); osc.stop(ctx.currentTime+dur);
+  }catch(e){ console.log("beep err",e); }
+}
+// unlock audio on first touch — required by iOS/Android
+function unlockAudio(){
+  getCtx();
+  // play silent buffer to unlock
+  try{
+    const ctx=getCtx();
+    const buf=ctx.createBuffer(1,1,22050);
+    const src=ctx.createBufferSource();
+    src.buffer=buf; src.connect(ctx.destination); src.start(0);
+  }catch(e){}
+}
+const soundTick =()=>beep(660,0.07,0.3,"sine");
+const soundWork =()=>{ beep(880,0.13,0.6,"sine"); setTimeout(()=>beep(1100,0.2,0.7,"sine"),140); };
+const soundRest =()=>{ beep(440,0.2,0.5,"sine");  setTimeout(()=>beep(330,0.25,0.4,"sine"),170); };
+const soundDone =()=>{ beep(660,0.13,0.5,"sine"); setTimeout(()=>beep(880,0.13,0.5,"sine"),160); setTimeout(()=>beep(1100,0.3,0.6,"sine"),320); };
 
 // ── TIMER ─────────────────────────────────────────────────────────────────
 function Timer({circuit, onClose, onComplete}){
@@ -129,30 +164,32 @@ function Timer({circuit, onClose, onComplete}){
     if(!running){clearInterval(ivRef.current);return;}
     ivRef.current=setInterval(()=>{
       setTimeLeft(t=>{
+        // last 3 sec tick
+        if(t<=3 && t>1) soundTick();
         if(t>1) return t-1;
         const ph=phaseRef.current;
-        if(ph==="warmup"){setPhase("get-ready");setCountdown(3);return 3;}
+        if(ph==="warmup"){setPhase("get-ready");setCountdown(3);soundTick();return 3;}
         if(ph==="get-ready"){
-          if(countdownRef.current>1){setCountdown(c=>c-1);return 1;}
-          setPhase("work");return circuit.workTime;
+          if(countdownRef.current>1){setCountdown(c=>c-1);soundTick();return 1;}
+          setPhase("work");soundWork();return circuit.workTime;
         }
         if(ph==="work"){
           setTotalSets(s=>s+1);
           const nextEx=exIdxRef.current+1;
           const totalEx=circuit.exercises.length;
-          if(nextEx<totalEx){setExIdx(nextEx);setPhase("ex-rest");return circuit.exRest;}
+          if(nextEx<totalEx){setExIdx(nextEx);setPhase("ex-rest");soundRest();return circuit.exRest;}
           else{
             const nextRound=roundRef.current+1;
-            if(nextRound<=circuit.rounds){setRound(nextRound);setExIdx(0);setPhase("round-rest");return circuit.roundRest;}
+            if(nextRound<=circuit.rounds){setRound(nextRound);setExIdx(0);setPhase("round-rest");soundRest();return circuit.roundRest;}
             else{
-              setPhase("done");setRunning(false);
+              setPhase("done");setRunning(false);soundDone();
               onComplete&&onComplete({sets:totalSetsRef.current+1,minutes:Math.round(elapsedRef2.current/60)});
               return 0;
             }
           }
         }
-        if(ph==="ex-rest"){setPhase("work");return circuit.workTime;}
-        if(ph==="round-rest"){setExIdx(0);setPhase("work");return circuit.workTime;}
+        if(ph==="ex-rest"){setPhase("work");soundWork();return circuit.workTime;}
+        if(ph==="round-rest"){setExIdx(0);setPhase("work");soundWork();return circuit.workTime;}
         return 0;
       });
     },1000);
@@ -164,7 +201,7 @@ function Timer({circuit, onClose, onComplete}){
 
   const phaseColor={
     warmup:"#FFB800","get-ready":"#FF4500",work:circuit.color,
-    "ex-rest":"#444","round-rest":"#444",done:"#00ff64",
+    "ex-rest":"#00C853","round-rest":"#00C853",done:"#00ff64",
   }[phase]||"#fff";
 
   const phaseLabel={
@@ -266,7 +303,7 @@ function Timer({circuit, onClose, onComplete}){
 
           {/* Controls */}
           <div style={{display:"flex",gap:14,marginTop:8}}>
-            <button onClick={()=>setRunning(r=>!r)} style={{padding:"16px 48px",borderRadius:14,background:running?"rgba(255,255,255,0.08)":circuit.color,border:running?"1px solid rgba(255,255,255,0.1)":"none",color:"white",fontSize:26,letterSpacing:4,fontFamily:"'Bebas Neue',sans-serif"}}>
+            <button onClick={()=>{ unlockAudio(); setRunning(r=>!r); }} style={{padding:"16px 48px",borderRadius:14,background:running?"rgba(255,255,255,0.08)":circuit.color,border:running?"1px solid rgba(255,255,255,0.1)":"none",color:"white",fontSize:26,letterSpacing:4,fontFamily:"'Bebas Neue',sans-serif"}}>
               {running?"⏸ PAUSE":phase==="warmup"?"START":"▶ RESUME"}
             </button>
             {phase==="warmup"&&(
