@@ -2,639 +2,486 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <title>IRON BELL</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <style>
-  @font-face{font-family:'Bebas Neue';src:local('Impact'),local('Arial Narrow');font-weight:400;}
-</style>
-<style>
-:root{--bg:#07090b;--card:#111416;--card2:#161a1e;--border:#1e2226;--accent:#ff7a1a;--red:#ff3b3b;--blue:#3b82f6;--purple:#a855f7;--green:#22c55e;--text:#f0f0f0;--muted:#5a6270;--muted2:#8a939f;}
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;overflow-x:hidden;max-width:480px;margin:0 auto;}
-.screen{display:none;flex-direction:column;min-height:100vh;}
-.screen.active{display:flex;}
-::-webkit-scrollbar{display:none;}
-
-/* SPLASH */
-#splash{background:var(--bg);align-items:center;justify-content:center;}
-.splash-glow{position:absolute;top:0;left:50%;transform:translateX(-50%);width:340px;height:340px;background:radial-gradient(circle,rgba(255,122,26,.18) 0%,transparent 70%);pointer-events:none;}
-.splash-logo{font-family:'Bebas Neue',sans-serif;font-size:72px;letter-spacing:4px;color:#fff;text-align:center;line-height:1;}
-.splash-logo span{color:var(--accent);}
-.splash-sub{font-size:12px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-top:6px;text-align:center;}
-.splash-bar{width:140px;height:2px;background:var(--border);border-radius:1px;margin-top:40px;overflow:hidden;}
-.splash-bar-fill{height:100%;background:var(--accent);border-radius:1px;animation:splashLoad 2s ease-in-out forwards;}
-@keyframes splashLoad{from{width:0}to{width:100%}}
-
-/* BOTTOM NAV */
-.bnav{display:flex;background:rgba(11,13,16,.95);border-top:1px solid var(--border);padding:8px 0 20px;position:sticky;bottom:0;z-index:100;backdrop-filter:blur(12px);}
-.bnav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:4px 0;opacity:.45;transition:opacity .2s;}
-.bnav-item.active{opacity:1;}
-.bnav-icon{font-size:20px;line-height:1;}
-.bnav-lbl{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--muted2);}
-.bnav-item.active .bnav-lbl{color:var(--accent);}
-
-/* HOME */
-#home{background:radial-gradient(ellipse at 65% 0%,#2a1000 0%,var(--bg) 52%);}
-.home-scroll{overflow-y:auto;flex:1;padding-bottom:4px;}
-.home-top{padding:52px 24px 0;}
-.badge-row{display:flex;gap:8px;align-items:center;margin-bottom:14px;}
-.badge{display:inline-block;background:var(--accent);color:#000;font-family:'Oswald',sans-serif;font-size:9px;letter-spacing:2px;padding:4px 10px;border-radius:2px;}
-.streak-badge{display:flex;align-items:center;gap:4px;background:rgba(255,122,26,.1);border:1px solid rgba(255,122,26,.25);border-radius:20px;padding:3px 10px;font-size:11px;color:var(--accent);}
-.home-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(54px,14vw,80px);line-height:.92;letter-spacing:2px;color:#fff;}
-.home-title span{color:var(--accent);}
-.home-sub{margin-top:10px;font-size:13px;color:var(--muted);line-height:1.6;max-width:280px;}
-.stats-row{display:flex;gap:9px;padding:20px 24px 0;}
-.stat-pill{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;flex:1;text-align:center;}
-.stat-pill .n{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--accent);line-height:1;}
-.stat-pill .l{font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:2px;}
-.sec-lbl{font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:2.5px;color:var(--muted);text-transform:uppercase;padding:22px 24px 11px;}
-.circuits-list{padding:0 24px;display:flex;flex-direction:column;gap:9px;}
-.circuit-card{background:var(--card2);border:1px solid var(--border);border-radius:14px;padding:15px 15px 15px 19px;cursor:pointer;transition:transform .1s,border-color .2s;position:relative;overflow:hidden;}
-.circuit-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;border-radius:4px 0 0 4px;}
-.cc-a::before{background:var(--accent);}
-.cc-b::before{background:var(--red);}
-.cc-c::before{background:var(--purple);}
-.circuit-card:active{transform:scale(.98);}
-.cc-head{display:flex;justify-content:space-between;align-items:center;}
-.cc-name{font-family:'Oswald',sans-serif;font-size:17px;letter-spacing:.3px;}
-.cc-badge{font-size:9px;padding:3px 8px;border-radius:4px;font-weight:600;letter-spacing:1px;text-transform:uppercase;}
-.cc-a .cc-badge{background:rgba(255,122,26,.15);color:var(--accent);}
-.cc-b .cc-badge{background:rgba(255,59,59,.15);color:var(--red);}
-.cc-c .cc-badge{background:rgba(168,85,247,.15);color:var(--purple);}
-.cc-meta{display:flex;gap:10px;margin-top:7px;flex-wrap:wrap;}
-.cc-meta span{font-size:11px;color:var(--muted);}
-.cc-meta strong{color:var(--text);}
-.chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:9px;}
-.chip{font-size:10px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:5px;padding:3px 7px;color:var(--muted);}
-.start-all-btn{margin:18px 24px 10px;background:var(--accent);color:#000;border:none;border-radius:13px;height:52px;font-family:'Oswald',sans-serif;font-size:16px;letter-spacing:2px;cursor:pointer;width:calc(100% - 48px);transition:opacity .15s;}
-.start-all-btn:active{opacity:.8;}
-.program-note{margin:0 24px 24px;background:rgba(255,122,26,.05);border:1px solid rgba(255,122,26,.12);border-radius:9px;padding:11px 13px;font-size:11px;color:var(--muted);line-height:1.6;}
-.program-note strong{color:var(--accent);}
-
-/* STATS */
-#stats-tab{overflow-y:auto;}
-.tab-header{padding:52px 24px 20px;}
-.tab-title{font-family:'Bebas Neue',sans-serif;font-size:38px;letter-spacing:1px;}
-.big-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 24px;}
-.bs-card{background:var(--card2);border:1px solid var(--border);border-radius:14px;padding:16px;}
-.bs-card .n{font-family:'Bebas Neue',sans-serif;font-size:38px;color:var(--accent);line-height:1;}
-.bs-card .l{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
-.week-grid{padding:16px 24px 0;}
-.week-row{display:flex;gap:6px;margin-top:8px;}
-.day-cell{flex:1;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:10px 4px;text-align:center;font-size:10px;color:var(--muted);}
-.day-cell .day{font-family:'Oswald',sans-serif;font-size:11px;margin-bottom:4px;color:var(--muted2);}
-.day-cell .dot-w{width:8px;height:8px;border-radius:50%;background:var(--border);margin:0 auto;}
-.day-cell.done .dot-w{background:var(--accent);}
-.day-cell.today{border-color:rgba(255,122,26,.4);}
-.hist-list{padding:14px 24px;display:flex;flex-direction:column;gap:8px;}
-.hist-row{background:var(--card2);border:1px solid var(--border);border-radius:11px;padding:13px 15px;display:flex;justify-content:space-between;align-items:center;}
-.hist-name{font-family:'Oswald',sans-serif;font-size:14px;}
-.hist-meta{font-size:11px;color:var(--muted);margin-top:2px;}
-.hist-right{text-align:right;}
-.hist-sets{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--accent);}
-.hist-time{font-size:10px;color:var(--muted);}
-.empty-state{text-align:center;padding:48px 24px;color:var(--muted);font-size:13px;}
-.empty-icon{font-size:40px;margin-bottom:12px;}
-
-/* DETAIL */
-#detail{background:var(--bg);}
-.det-header{display:flex;align-items:center;gap:14px;padding:52px 24px 0;}
-.back-btn{width:38px;height:38px;background:var(--card2);border:1px solid var(--border);border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;flex-shrink:0;}
-.det-title{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:1px;}
-.round-pills{margin:14px 24px 0;display:flex;gap:7px;flex-wrap:wrap;}
-.rpill{background:var(--card2);border:1px solid var(--border);border-radius:7px;padding:6px 12px;font-size:11px;color:var(--muted);}
-.rpill strong{color:var(--text);}
-.rest-note{margin:10px 24px 0;background:rgba(59,130,246,.07);border:1px solid rgba(59,130,246,.18);border-radius:8px;padding:9px 13px;font-size:11px;color:var(--muted);line-height:1.5;}
-.rest-note strong{color:var(--blue);}
-.exs-list{padding:13px 24px;display:flex;flex-direction:column;gap:8px;}
-.ex-row{background:var(--card2);border:1px solid var(--border);border-radius:11px;padding:12px 14px;display:flex;gap:11px;align-items:flex-start;}
-.ex-num{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--border);line-height:1;width:24px;flex-shrink:0;}
-.ex-info{flex:1;}
-.ex-name{font-family:'Oswald',sans-serif;font-size:14px;letter-spacing:.3px;}
-.ex-desc{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.5;}
-.ex-tags{display:flex;gap:5px;margin-top:6px;flex-wrap:wrap;}
-.ex-tag{font-size:9px;padding:2px 6px;border-radius:3px;font-weight:500;}
-.tm{background:rgba(255,122,26,.1);color:var(--accent);}
-.tt{background:rgba(255,59,59,.1);color:var(--red);}
-.start-c-btn{margin:6px 24px 32px;background:var(--accent);color:#000;border:none;border-radius:13px;height:52px;font-family:'Oswald',sans-serif;font-size:16px;letter-spacing:2px;cursor:pointer;width:calc(100% - 48px);transition:opacity .15s;}
-.start-c-btn:active{opacity:.8;}
-.scroll-area{overflow-y:auto;flex:1;padding-bottom:4px;}
-
-/* WARMUP */
-#warmup{background:radial-gradient(ellipse at 50% 20%,#1a1000 0%,var(--bg) 60%);align-items:center;justify-content:center;text-align:center;padding:24px;}
-.wu-title{font-family:'Bebas Neue',sans-serif;font-size:48px;color:var(--accent);letter-spacing:2px;}
-.wu-sub{font-size:13px;color:var(--muted);margin-top:6px;line-height:1.6;}
-.wu-list{margin:24px 0;display:flex;flex-direction:column;gap:9px;width:100%;}
-.wu-item{background:var(--card2);border:1px solid var(--border);border-radius:11px;padding:12px 16px;display:flex;align-items:center;gap:12px;text-align:left;}
-.wu-icon{font-size:22px;flex-shrink:0;}
-.wu-name{font-family:'Oswald',sans-serif;font-size:14px;}
-.wu-detail{font-size:11px;color:var(--muted);margin-top:1px;}
-.wu-btn{background:var(--accent);color:#000;border:none;border-radius:13px;height:52px;font-family:'Oswald',sans-serif;font-size:16px;letter-spacing:2px;cursor:pointer;width:100%;margin-top:8px;}
-
-/* COUNTDOWN */
-#countdown{background:var(--bg);align-items:center;justify-content:center;text-align:center;}
-.cd-label{font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;}
-.cd-num{font-family:'Bebas Neue',sans-serif;font-size:140px;line-height:1;color:var(--accent);}
-@keyframes cdBeat{0%{transform:scale(1.3);opacity:.6;}100%{transform:scale(1);opacity:1;}}
-.cd-num.beat{animation:cdBeat .35s ease-out forwards;}
-.cd-ex{font-family:'Bebas Neue',sans-serif;font-size:28px;margin-top:8px;letter-spacing:1px;}
-
-/* TIMER */
-#timer{background:radial-gradient(ellipse at 50% 15%,#1a0800 0%,var(--bg) 58%);align-items:center;}
-.t-header{width:100%;display:flex;justify-content:space-between;align-items:center;padding:52px 24px 0;}
-.t-back{width:38px;height:38px;background:var(--card2);border:1px solid var(--border);border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;}
-.t-cname{font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;}
-.t-round{font-family:'Bebas Neue',sans-serif;font-size:15px;color:var(--accent);}
-.phase-bar{width:calc(100% - 48px);height:3px;background:var(--border);border-radius:2px;margin:18px 0 0;overflow:hidden;}
-.phase-fill{height:100%;border-radius:2px;transition:width .1s linear,background .3s;}
-.rr-banner{width:calc(100% - 48px);margin-top:12px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);border-radius:9px;padding:8px 14px;text-align:center;font-size:11px;color:var(--green);letter-spacing:1px;display:none;}
-.rr-banner.show{display:block;}
-.state-lbl{font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:3px;text-transform:uppercase;margin-top:14px;transition:color .3s;}
-.big-timer{font-family:'Bebas Neue',sans-serif;font-size:clamp(90px,24vw,120px);line-height:1;letter-spacing:-2px;transition:color .3s;margin-top:0;}
-.cur-ex{font-family:'Bebas Neue',sans-serif;font-size:clamp(24px,6.5vw,34px);text-align:center;padding:0 20px;letter-spacing:1px;min-height:42px;}
-.cur-desc{font-size:11px;color:var(--muted);text-align:center;padding:4px 28px 0;line-height:1.5;min-height:36px;}
-.next-box{background:var(--card2);border:1px solid var(--border);border-radius:11px;padding:10px 15px;width:calc(100% - 48px);margin-top:14px;display:flex;align-items:center;gap:9px;}
-.next-lbl{font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;flex-shrink:0;}
-.next-name{font-family:'Oswald',sans-serif;font-size:13px;}
-.dots{display:flex;gap:6px;margin-top:14px;}
-.dot{width:7px;height:7px;border-radius:50%;background:var(--border);transition:background .3s,transform .2s;}
-.dot.done{background:var(--accent);}
-.dot.active{background:var(--accent);transform:scale(1.5);}
-.t-controls{display:flex;gap:12px;width:calc(100% - 48px);margin-top:18px;margin-bottom:36px;}
-.ctrl{height:52px;border-radius:13px;border:none;cursor:pointer;font-family:'Oswald',sans-serif;font-size:14px;letter-spacing:1.5px;transition:opacity .15s,transform .1s;}
-.ctrl:active{transform:scale(.97);opacity:.8;}
-.c-pause{background:var(--card2);border:1px solid var(--border);color:var(--text);flex:1;}
-.c-next{background:var(--accent);color:#000;flex:2;}
-
-/* COMPLETE */
-#complete{background:radial-gradient(ellipse at 50% 30%,#251000 0%,var(--bg) 70%);align-items:center;justify-content:center;text-align:center;padding:24px;}
-.comp-icon{font-size:56px;margin-bottom:12px;}
-.comp-title{font-family:'Bebas Neue',sans-serif;font-size:50px;color:var(--accent);letter-spacing:2px;}
-.comp-sub{color:var(--muted);font-size:13px;margin-top:6px;line-height:1.6;}
-.comp-stats{display:flex;gap:10px;margin-top:22px;}
-.cs{background:var(--card2);border:1px solid var(--border);border-radius:11px;padding:13px 16px;flex:1;}
-.cs .n{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--accent);}
-.cs .l{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
-.home-btn{margin-top:22px;background:var(--accent);color:#000;border:none;border-radius:13px;height:52px;font-family:'Oswald',sans-serif;font-size:16px;letter-spacing:2px;cursor:pointer;width:100%;}
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{background:#080808;color:white;font-family:'DM Sans',sans-serif;overscroll-behavior:none;}
+  button{cursor:pointer;font-family:inherit;}
+  ::-webkit-scrollbar{display:none;}
 </style>
 </head>
 <body>
+<div id="root"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
 
-<!-- SPLASH -->
-<div id="splash" class="screen active">
-  <div class="splash-glow"></div>
-  <div class="splash-logo">IRON<br/><span>BELL</span></div>
-  <div class="splash-sub">Elite Kettlebell Protocol</div>
-  <div class="splash-bar"><div class="splash-bar-fill"></div></div>
-</div>
+const CIRCUITS = [
+  {
+    id:"A", name:"Circuit A", subtitle:"Power & Pull",
+    color:"#FF4500", glow:"rgba(255,69,0,0.18)",
+    exercises:[
+      {name:"KB Renegade Row",icon:"🔥"},
+      {name:"KB Push-Ups",icon:"💪"},
+      {name:"Shoulder Press + Jacks",icon:"⚡"},
+      {name:"KB Swing Squats",icon:"🏋️"},
+    ],
+    rounds:3, workTime:60, exRest:15, roundRest:60,
+  },
+  {
+    id:"B", name:"Circuit B", subtitle:"Burn & Build",
+    color:"#FFB800", glow:"rgba(255,184,0,0.18)",
+    exercises:[
+      {name:"Double KB Clean & Press",icon:"🔥"},
+      {name:"KB Thruster",icon:"💀"},
+      {name:"KB Swing",icon:"⚡"},
+      {name:"Goblet Squat",icon:"🏋️"},
+    ],
+    rounds:3, workTime:60, exRest:15, roundRest:60,
+  },
+  {
+    id:"C", name:"Circuit C", subtitle:"Grind & Shred",
+    color:"#00C2FF", glow:"rgba(0,194,255,0.18)",
+    exercises:[
+      {name:"KB Snatch (Alt)",icon:"🔥"},
+      {name:"KB Deadlift",icon:"🏋️"},
+      {name:"KB Front Rack Lunge",icon:"💪"},
+      {name:"KB Windmill",icon:"🌀"},
+    ],
+    rounds:3, workTime:60, exRest:15, roundRest:60,
+  },
+];
 
-<!-- HOME -->
-<div id="home" class="screen">
-  <div class="home-scroll">
-    <div class="home-top">
-      <div class="badge-row">
-        <div class="badge">⚡ ELITE</div>
-        <div class="streak-badge">🔥 <span id="streak-txt">0 day streak</span></div>
-      </div>
-      <div class="home-title">IRON<br/><span>BELL</span></div>
-      <div class="home-sub">3-circuit advanced kettlebell protocol. Fat loss + muscle hypertrophy.</div>
-    </div>
-    <div class="stats-row">
-      <div class="stat-pill"><div class="n" id="hs-sessions">0</div><div class="l">Sessions</div></div>
-      <div class="stat-pill"><div class="n" id="hs-sets">0</div><div class="l">Total Sets</div></div>
-      <div class="stat-pill"><div class="n" id="hs-mins">0</div><div class="l">Minutes</div></div>
-    </div>
-    <div class="sec-lbl">Today's Circuits</div>
-    <div class="circuits-list">
-      <div class="circuit-card cc-a" onclick="openDetail('A')">
-        <div class="cc-head"><div class="cc-name">Circuit A — Power & Pull</div><div class="cc-badge">4 EX · 3 RDS</div></div>
-        <div class="cc-meta"><span><strong>1 min</strong> work</span><span><strong>15 sec</strong> ex-rest</span><span><strong>1 min</strong> round-rest</span></div>
-        <div class="chips"><span class="chip">KB Renegade Row</span><span class="chip">KB Push-Ups</span><span class="chip">Shoulder Press + Jacks</span><span class="chip">KB Swing Squats</span></div>
-      </div>
-      <div class="circuit-card cc-b" onclick="openDetail('B')">
-        <div class="cc-head"><div class="cc-name">Circuit B — Burn & Build</div><div class="cc-badge">4 EX · 3 RDS</div></div>
-        <div class="cc-meta"><span><strong>1 min</strong> work</span><span><strong>15 sec</strong> ex-rest</span><span><strong>1 min</strong> round-rest</span></div>
-        <div class="chips"><span class="chip">Double KB Clean & Press</span><span class="chip">KB Thruster</span><span class="chip">KB Swing</span><span class="chip">Goblet Squat</span></div>
-      </div>
-      <div class="circuit-card cc-c" onclick="openDetail('C')">
-        <div class="cc-head"><div class="cc-name">Circuit C — Grind & Shred</div><div class="cc-badge">4 EX · 3 RDS</div></div>
-        <div class="cc-meta"><span><strong>1 min</strong> work</span><span><strong>15 sec</strong> ex-rest</span><span><strong>1 min</strong> round-rest</span></div>
-        <div class="chips"><span class="chip">KB Snatch (Alt)</span><span class="chip">KB Deadlift</span><span class="chip">KB Front Rack Lunge</span><span class="chip">KB Windmill</span></div>
-      </div>
-    </div>
-    <button class="start-all-btn" onclick="startFull()">▶ START FULL SESSION</button>
-    <div class="program-note"><strong>Rest:</strong> 15 sec between exercises · 1 min after each round · 2 min between circuits.<br/><strong>Load:</strong> Men 16–24 kg · Women 12–16 kg.</div>
-  </div>
-  <nav class="bnav">
-    <div class="bnav-item active" onclick="showTab('home')"><div class="bnav-icon">🏠</div><div class="bnav-lbl">Home</div></div>
-    <div class="bnav-item" onclick="showTab('stats-tab')"><div class="bnav-icon">📊</div><div class="bnav-lbl">Stats</div></div>
-  </nav>
-</div>
+const WARMUP = [
+  {name:"Hip Circles",detail:"30 sec each side · loosen hip flexors",icon:"🔄"},
+  {name:"Leg Swings",detail:"20 reps each leg · dynamic hamstring",icon:"🦵"},
+  {name:"Arm Circles + Shoulder Rolls",detail:"30 sec · prep rotator cuff",icon:"💪"},
+  {name:"Light KB Swing (empty hand)",detail:"15 reps · groove hinge pattern",icon:"🏃"},
+  {name:"Deep Squat Hold",detail:"30 sec · ankle + hip mobility",icon:"🧘"},
+];
 
-<!-- STATS -->
-<div id="stats-tab" class="screen">
-  <div class="tab-header"><div class="tab-title">Your Stats</div></div>
-  <div class="big-stats">
-    <div class="bs-card"><div class="n" id="st-sessions">0</div><div class="l">Sessions Done</div></div>
-    <div class="bs-card"><div class="n" id="st-streak">0</div><div class="l">Day Streak 🔥</div></div>
-    <div class="bs-card"><div class="n" id="st-sets">0</div><div class="l">Total Sets</div></div>
-    <div class="bs-card"><div class="n" id="st-mins">0</div><div class="l">Total Minutes</div></div>
-  </div>
-  <div class="week-grid">
-    <div class="sec-lbl" style="padding:16px 0 8px;">This Week</div>
-    <div class="week-row" id="week-row"></div>
-  </div>
-  <div class="sec-lbl" style="padding:18px 24px 8px;">Recent Sessions</div>
-  <div class="hist-list" id="hist-list"></div>
-  <nav class="bnav">
-    <div class="bnav-item" onclick="showTab('home')"><div class="bnav-icon">🏠</div><div class="bnav-lbl">Home</div></div>
-    <div class="bnav-item active" onclick="showTab('stats-tab')"><div class="bnav-icon">📊</div><div class="bnav-lbl">Stats</div></div>
-  </nav>
-</div>
+const fmtTime = s=>`${String(Math.floor(s/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`;
+const circumference = 2*Math.PI*88;
 
-<!-- DETAIL -->
-<div id="detail" class="screen">
-  <div class="det-header">
-    <div class="back-btn" onclick="showTab('home')">←</div>
-    <div class="det-title" id="det-title">Circuit A</div>
-  </div>
-  <div class="round-pills" id="round-pills"></div>
-  <div class="rest-note"><strong>Rest:</strong> 15 sec between exercises · <strong>1 min</strong> after each round · <strong>2 min</strong> between circuits.</div>
-  <div class="scroll-area">
-    <div class="exs-list" id="exs-list"></div>
-    <button class="start-c-btn" id="start-c-btn">▶ START CIRCUIT</button>
-  </div>
-</div>
+// ── TIMER ─────────────────────────────────────────────────────────────────
+function Timer({circuit, onClose, onComplete}){
+  const [phase,setPhase]=useState("warmup");
+  const [timeLeft,setTimeLeft]=useState(180);
+  const [round,setRound]=useState(1);
+  const [exIdx,setExIdx]=useState(0);
+  const [running,setRunning]=useState(false);
+  const [countdown,setCountdown]=useState(3);
+  const [totalSets,setTotalSets]=useState(0);
+  const [elapsed,setElapsed]=useState(0);
+  const ivRef=useRef(null);
+  const elRef=useRef(null);
 
-<!-- WARMUP -->
-<div id="warmup" class="screen">
-  <div class="wu-title">WARM UP</div>
-  <div class="wu-sub">3 minutes · Get blood flowing before lifting heavy</div>
-  <div class="wu-list">
-    <div class="wu-item"><div class="wu-icon">🔄</div><div><div class="wu-name">Hip Circles</div><div class="wu-detail">30 sec each side · loosen hip flexors</div></div></div>
-    <div class="wu-item"><div class="wu-icon">🦵</div><div><div class="wu-name">Leg Swings</div><div class="wu-detail">20 reps each leg · dynamic hamstring</div></div></div>
-    <div class="wu-item"><div class="wu-icon">💪</div><div><div class="wu-name">Arm Circles + Shoulder Rolls</div><div class="wu-detail">30 sec · prep rotator cuff</div></div></div>
-    <div class="wu-item"><div class="wu-icon">🏃</div><div><div class="wu-name">Light KB Swing (empty hand)</div><div class="wu-detail">15 reps · groove hinge pattern</div></div></div>
-    <div class="wu-item"><div class="wu-icon">🧘</div><div><div class="wu-name">Deep Squat Hold</div><div class="wu-detail">30 sec · ankle + hip mobility</div></div></div>
-  </div>
-  <button class="wu-btn" onclick="startCountdown()">LET'S GO →</button>
-</div>
+  // refs to avoid stale closures
+  const phaseRef=useRef(phase);
+  const exIdxRef=useRef(exIdx);
+  const roundRef=useRef(round);
+  const countdownRef=useRef(countdown);
+  const totalSetsRef=useRef(totalSets);
+  const elapsedRef2=useRef(elapsed);
 
-<!-- COUNTDOWN -->
-<div id="countdown" class="screen">
-  <div class="cd-label">GET READY</div>
-  <div class="cd-num" id="cd-num">3</div>
-  <div class="cd-ex" id="cd-ex"></div>
-</div>
+  useEffect(()=>{phaseRef.current=phase;},[phase]);
+  useEffect(()=>{exIdxRef.current=exIdx;},[exIdx]);
+  useEffect(()=>{roundRef.current=round;},[round]);
+  useEffect(()=>{countdownRef.current=countdown;},[countdown]);
+  useEffect(()=>{totalSetsRef.current=totalSets;},[totalSets]);
+  useEffect(()=>{elapsedRef2.current=elapsed;},[elapsed]);
 
-<!-- TIMER -->
-<div id="timer" class="screen">
-  <div class="t-header">
-    <div class="t-back" onclick="stopTimer()">✕</div>
-    <div class="t-cname" id="t-cname">Circuit A</div>
-    <div class="t-round" id="t-round">R1/3</div>
-  </div>
-  <div class="phase-bar"><div class="phase-fill" id="phase-fill"></div></div>
-  <div class="rr-banner" id="rr-banner">✅ ROUND DONE — REST 1 MIN</div>
-  <div class="state-lbl" id="state-lbl">WORK</div>
-  <div class="big-timer" id="big-timer">60</div>
-  <div class="cur-ex" id="cur-ex"></div>
-  <div class="cur-desc" id="cur-desc"></div>
-  <div class="next-box">
-    <span class="next-lbl">Next</span>
-    <span class="next-name" id="next-name">—</span>
-  </div>
-  <div class="dots" id="dots"></div>
-  <div class="t-controls">
-    <button class="ctrl c-pause" id="pause-btn" onclick="togglePause()">⏸ PAUSE</button>
-    <button class="ctrl c-next" onclick="skipCurrent()">SKIP →</button>
-  </div>
-</div>
+  useEffect(()=>{
+    if(running){elRef.current=setInterval(()=>setElapsed(e=>e+1),1000);}
+    return()=>clearInterval(elRef.current);
+  },[running]);
 
-<!-- COMPLETE -->
-<div id="complete" class="screen">
-  <div class="comp-icon">🔥</div>
-  <div class="comp-title">BEAST<br/>MODE</div>
-  <div class="comp-sub" id="comp-sub">Session crushed.</div>
-  <div class="comp-stats">
-    <div class="cs"><div class="n" id="cs-r">—</div><div class="l">Rounds</div></div>
-    <div class="cs"><div class="n" id="cs-t">—</div><div class="l">Minutes</div></div>
-    <div class="cs"><div class="n" id="cs-s">—</div><div class="l">Sets</div></div>
-  </div>
-  <button class="home-btn" onclick="goHome()">← BACK TO PROGRAM</button>
-</div>
-
-<script>
-// ── DATA ──
-const circuits = {
-  A:{name:"Circuit A — Power & Pull",short:"Circuit A",rounds:3,color:"#ff7a1a",exercises:[
-    {name:"KB Renegade Row",desc:"Plank on two bells, row one explosive at a time. Hips stay locked — no rotation.",muscles:["Lats","Core","Biceps"],type:"Pull"},
-    {name:"KB Push-Ups",desc:"Hands on KB handles. Full depth push-up. Increased range + serious chest overload.",muscles:["Chest","Triceps","Core"],type:"Push"},
-    {name:"Shoulder Press + Jumping Jacks",desc:"Press bells overhead, lower, then 2 jumping jacks. Repeat. Cardio + shoulder hypertrophy.",muscles:["Shoulders","Traps"],type:"Hybrid"},
-    {name:"KB Swing Squats",desc:"Swing bell up, squat at the top, stand, swing again. Explosive hips + quad burn.",muscles:["Glutes","Quads","Hamstrings"],type:"Ballistic"}
-  ]},
-  B:{name:"Circuit B — Burn & Build",short:"Circuit B",rounds:3,color:"#ff3b3b",exercises:[
-    {name:"Double KB Clean & Press",desc:"Hip drive, clean to rack, overhead press in one chain. The king of KB strength.",muscles:["Shoulders","Traps","Glutes"],type:"Compound"},
-    {name:"KB Thruster",desc:"Front squat into overhead press — zero pause. Heart rate spikes. Maximum fat burn.",muscles:["Quads","Glutes","Shoulders"],type:"Full Body"},
-    {name:"KB Swing (Two-Hand)",desc:"Hike bell, explosive hip snap, float to shoulder height. #1 fat-loss KB movement.",muscles:["Glutes","Hamstrings","Core"],type:"Ballistic"},
-    {name:"KB Goblet Squat",desc:"Bell at chest, elbows inside knees, squat as deep as possible. Upright torso always.",muscles:["Quads","Glutes","Core"],type:"Squat"}
-  ]},
-  C:{name:"Circuit C — Grind & Shred",short:"Circuit C",rounds:3,color:"#a855f7",exercises:[
-    {name:"KB Snatch (Alternating)",desc:"One-arm swing into punch-through at top. Alternate arms each rep. Brutal cardio.",muscles:["Shoulders","Hips","Core"],type:"Ballistic"},
-    {name:"KB Deadlift",desc:"Two bells between feet. Hinge hard, drive hips. Posterior chain king. Dead stop every rep.",muscles:["Hamstrings","Glutes","Lower Back"],type:"Hinge"},
-    {name:"KB Front Rack Lunge",desc:"Two bells front rack. Alternate forward lunges. Demands upright posture + serious core.",muscles:["Quads","Glutes","Core"],type:"Lunge"},
-    {name:"KB Windmill",desc:"Bell locked overhead. Hinge sideways, reach free hand to floor. Elite shoulder stability.",muscles:["Obliques","Shoulders","Hamstrings"],type:"Grind"}
-  ]}
-};
-
-const WORK=60, EX_REST=15, ROUND_REST=60, CIRCUIT_REST=120;
-
-// ── AUDIO ──
-let ac = null;
-function ensureAC(){
-  if(!ac){ try{ ac = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} }
-  if(ac && ac.state==='suspended'){ try{ ac.resume(); }catch(e){} }
-}
-function tone(freq, dur, vol, type){
-  if(!ac) return;
-  try{
-    const o=ac.createOscillator(), g=ac.createGain();
-    o.connect(g); g.connect(ac.destination);
-    o.type = type||'sine'; o.frequency.value = freq;
-    const t = ac.currentTime;
-    g.gain.setValueAtTime(vol||0.4, t);
-    g.gain.exponentialRampToValueAtTime(0.001, t+dur);
-    o.start(t); o.stop(t+dur+0.01);
-  }catch(e){}
-}
-// Countdown tick: sharp high click
-function beepTick(){ tone(880,0.06,0.5,'sine'); tone(440,0.09,0.25,'triangle'); }
-// GO blast: rising 3-tone chord
-function beepGo(){
-  tone(660,0.15,0.4,'sine');
-  setTimeout(()=>tone(880,0.15,0.45,'sine'),90);
-  setTimeout(()=>tone(1100,0.25,0.5,'sine'),180);
-}
-function beepWork(){ tone(880,0.12,0.5,'sine'); }
-function beepRest(){ tone(440,0.18,0.4,'sine'); }
-function beepRound(){ tone(660,0.08,0.4); setTimeout(()=>tone(660,0.08,0.4),120); setTimeout(()=>tone(880,0.2,0.5),240); }
-function beepWarning(){ tone(660,0.07,0.3); setTimeout(()=>tone(660,0.07,0.3),180); }
-function beepComplete(){ [0,150,300,500].forEach((d,i)=>setTimeout(()=>tone(440+i*220,0.15,0.4),d)); }
-
-function pulseCdNum(){
-  const el = document.getElementById('cd-num');
-  el.classList.remove('beat');
-  void el.offsetWidth; // reflow to restart animation
-  el.classList.add('beat');
-}
-
-// ── STORAGE ──
-function saveSession(data){
-  const k='ironbell_history', hist=JSON.parse(localStorage.getItem(k)||'[]');
-  hist.unshift({...data,date:Date.now()});
-  if(hist.length>30) hist.pop();
-  localStorage.setItem(k,JSON.stringify(hist));
-  const t=JSON.parse(localStorage.getItem('ironbell_totals')||'{"sessions":0,"sets":0,"mins":0}');
-  t.sessions++; t.sets+=data.sets; t.mins+=data.mins;
-  localStorage.setItem('ironbell_totals',JSON.stringify(t));
-}
-function getHistory(){ return JSON.parse(localStorage.getItem('ironbell_history')||'[]'); }
-function getTotals(){ return JSON.parse(localStorage.getItem('ironbell_totals')||'{"sessions":0,"sets":0,"mins":0}'); }
-function getStreak(){
-  const hist=getHistory(); if(!hist.length) return 0;
-  const days=new Set(hist.map(h=>new Date(h.date).toDateString()));
-  let s=0, d=new Date();
-  while(days.has(d.toDateString())){ s++; d.setDate(d.getDate()-1); }
-  return s;
-}
-
-// ── NAV ──
-function setScreen(id){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
-function showTab(id){
-  if(id==='stats-tab') refreshStats();
-  if(id==='home') refreshHome();
-  setScreen(id);
-}
-function refreshHome(){
-  const t=getTotals(), s=getStreak();
-  document.getElementById('hs-sessions').textContent=t.sessions;
-  document.getElementById('hs-sets').textContent=t.sets;
-  document.getElementById('hs-mins').textContent=t.mins;
-  document.getElementById('streak-txt').textContent=s+' day streak';
-}
-function refreshStats(){
-  const t=getTotals(), s=getStreak(), hist=getHistory();
-  document.getElementById('st-sessions').textContent=t.sessions;
-  document.getElementById('st-streak').textContent=s;
-  document.getElementById('st-sets').textContent=t.sets;
-  document.getElementById('st-mins').textContent=t.mins;
-  const days=['SUN','MON','TUE','WED','THU','FRI','SAT'], today=new Date();
-  const sd=new Set(hist.map(h=>new Date(h.date).toDateString()));
-  let wr='';
-  for(let i=6;i>=0;i--){
-    const d=new Date(today); d.setDate(d.getDate()-i);
-    wr+=`<div class="day-cell${sd.has(d.toDateString())?' done':''}${i===0?' today':''}">
-      <div class="day">${days[d.getDay()]}</div><div class="dot-w"></div></div>`;
-  }
-  document.getElementById('week-row').innerHTML=wr;
-  if(!hist.length){
-    document.getElementById('hist-list').innerHTML='<div class="empty-state"><div class="empty-icon">🏋️</div>No sessions yet.<br/>Complete your first workout!</div>';
-    return;
-  }
-  document.getElementById('hist-list').innerHTML=hist.slice(0,8).map(h=>`
-    <div class="hist-row">
-      <div><div class="hist-name">${h.name||'Full Session'}</div><div class="hist-meta">${new Date(h.date).toLocaleDateString('en-CA',{weekday:'short',month:'short',day:'numeric'})}</div></div>
-      <div class="hist-right"><div class="hist-sets">${h.sets}</div><div class="hist-time">${h.mins} min · ${h.rounds} rounds</div></div>
-    </div>`).join('');
-}
-
-// ── DETAIL ──
-let pendingCircuit=null, pendingFull=false;
-function openDetail(key){
-  pendingCircuit=key; pendingFull=false;
-  const c=circuits[key];
-  document.getElementById('det-title').textContent=c.name;
-  document.getElementById('round-pills').innerHTML=`
-    <div class="rpill"><strong>${c.rounds}</strong> Rounds</div>
-    <div class="rpill"><strong>1 min</strong> Work</div>
-    <div class="rpill"><strong>15 sec</strong> Ex-Rest</div>
-    <div class="rpill"><strong>1 min</strong> Round-Rest</div>`;
-  document.getElementById('exs-list').innerHTML=c.exercises.map((ex,i)=>`
-    <div class="ex-row">
-      <div class="ex-num">${String(i+1).padStart(2,'0')}</div>
-      <div class="ex-info">
-        <div class="ex-name">${ex.name}</div>
-        <div class="ex-desc">${ex.desc}</div>
-        <div class="ex-tags">${ex.muscles.map(m=>`<span class="ex-tag tm">${m}</span>`).join('')}<span class="ex-tag tt">${ex.type}</span></div>
-      </div>
-    </div>`).join('');
-  document.getElementById('start-c-btn').onclick=()=>{ pendingFull=false; goToWarmup(); };
-  setScreen('detail');
-}
-function startFull(){ pendingFull=true; pendingCircuit='A'; goToWarmup(); }
-function goToWarmup(){ setScreen('warmup'); }
-
-// ── COUNTDOWN ──
-let cdVal=3, cdInt=null;
-function startCountdown(){
-  ensureAC();
-  const c=circuits[pendingCircuit];
-  const cdEl=document.getElementById('cd-num');
-  document.getElementById('cd-ex').textContent=c.exercises[0].name;
-  cdVal=3;
-  cdEl.textContent=cdVal;
-  cdEl.style.color='var(--accent)';
-  setScreen('countdown');
-  // Beep + pulse immediately for "3"
-  beepTick(); pulseCdNum();
-  cdInt=setInterval(()=>{
-    cdVal--;
-    if(cdVal<=0){
-      clearInterval(cdInt);
-      cdEl.textContent='GO!';
-      pulseCdNum();
-      beepGo();
-      setTimeout(()=>launchCircuit(pendingCircuit, pendingFull?['B','C']:[]), 800);
+  const doSkip=()=>{
+    clearInterval(ivRef.current);
+    const ei=exIdxRef.current, totalEx=circuit.exercises.length;
+    const r=roundRef.current;
+    const nextEx=ei+1;
+    if(nextEx<totalEx){
+      setExIdx(nextEx); setPhase("ex-rest"); setTimeLeft(circuit.exRest);
     } else {
-      cdEl.textContent=cdVal;
-      pulseCdNum();
-      beepTick();
-    }
-  },1000);
-}
-
-// ── TIMER ──
-let curCircuit=null, interval=null, paused=false, timeLeft=0;
-let phase='work', exIdx=0, roundNum=1, totalRounds=3, setsTotal=0;
-let sessionStart=null, isFullSession=false, fullQueue=[], warnedAt3=false;
-
-function launchCircuit(key, fq){
-  curCircuit=key; fullQueue=fq||[];
-  isFullSession=fullQueue.length>0;
-  roundNum=1; totalRounds=circuits[key].rounds;
-  exIdx=0; phase='work'; setsTotal=0;
-  sessionStart=sessionStart||Date.now();
-  timeLeft=WORK; warnedAt3=false;
-  setScreen('timer'); updateUI(); runTimer();
-}
-function runTimer(){
-  clearInterval(interval); paused=false;
-  document.getElementById('pause-btn').textContent='⏸ PAUSE';
-  interval=setInterval(()=>{
-    if(paused) return;
-    timeLeft--;
-    if(phase==='work'&&timeLeft===3&&!warnedAt3){ beepWarning(); warnedAt3=true; }
-    if(timeLeft<=0) advance(); else updateUI();
-  },1000);
-}
-function runInterCircuitCountdown(nextKey){
-  clearInterval(cdInt);
-  pendingCircuit=nextKey;
-  const cdEl=document.getElementById('cd-num');
-  document.getElementById('cd-ex').textContent=circuits[nextKey].exercises[0].name;
-  cdVal=3; cdEl.textContent=cdVal; cdEl.style.color='var(--accent)';
-  setScreen('countdown');
-  beepTick(); pulseCdNum();
-  cdInt=setInterval(()=>{
-    cdVal--;
-    if(cdVal<=0){
-      clearInterval(cdInt);
-      cdEl.textContent='GO!'; pulseCdNum(); beepGo();
-      setTimeout(()=>launchCircuit(nextKey, fullQueue), 800);
-    } else {
-      cdEl.textContent=cdVal; pulseCdNum(); beepTick();
-    }
-  },1000);
-}
-function advance(){
-  const c=circuits[curCircuit], exCount=c.exercises.length;
-  warnedAt3=false;
-  if(phase==='work'){
-    setsTotal++;
-    if(exIdx===exCount-1){
-      if(roundNum>=totalRounds){
-        if(isFullSession&&fullQueue.length>0){ phase='circuit-rest'; timeLeft=CIRCUIT_REST; beepRound(); updateUI(); return; }
-        finishSession(); return;
+      const nextRound=r+1;
+      if(nextRound<=circuit.rounds){
+        setRound(nextRound); setExIdx(0); setPhase("round-rest"); setTimeLeft(circuit.roundRest);
+      } else {
+        setPhase("done"); setRunning(false);
+        onComplete&&onComplete({sets:totalSetsRef.current,minutes:Math.round(elapsedRef2.current/60)});
       }
-      phase='round-rest'; timeLeft=ROUND_REST; beepRound();
-    } else {
-      phase='ex-rest'; timeLeft=EX_REST; beepRest();
     }
-    updateUI();
-  } else if(phase==='ex-rest'){
-    exIdx++; phase='work'; timeLeft=WORK; beepWork(); updateUI();
-  } else if(phase==='round-rest'){
-    exIdx=0; roundNum++; phase='work'; timeLeft=WORK; beepWork(); updateUI();
-  } else if(phase==='circuit-rest'){
-    runInterCircuitCountdown(fullQueue.shift());
-  }
+  };
+
+  const doSkipWarmup=()=>{
+    clearInterval(ivRef.current);
+    setRunning(false); setPhase("get-ready"); setCountdown(3); setTimeLeft(3);
+  };
+
+  useEffect(()=>{
+    if(!running){clearInterval(ivRef.current);return;}
+    ivRef.current=setInterval(()=>{
+      setTimeLeft(t=>{
+        if(t>1) return t-1;
+        const ph=phaseRef.current;
+        if(ph==="warmup"){setPhase("get-ready");setCountdown(3);return 3;}
+        if(ph==="get-ready"){
+          if(countdownRef.current>1){setCountdown(c=>c-1);return 1;}
+          setPhase("work");return circuit.workTime;
+        }
+        if(ph==="work"){
+          setTotalSets(s=>s+1);
+          const nextEx=exIdxRef.current+1;
+          const totalEx=circuit.exercises.length;
+          if(nextEx<totalEx){setExIdx(nextEx);setPhase("ex-rest");return circuit.exRest;}
+          else{
+            const nextRound=roundRef.current+1;
+            if(nextRound<=circuit.rounds){setRound(nextRound);setExIdx(0);setPhase("round-rest");return circuit.roundRest;}
+            else{
+              setPhase("done");setRunning(false);
+              onComplete&&onComplete({sets:totalSetsRef.current+1,minutes:Math.round(elapsedRef2.current/60)});
+              return 0;
+            }
+          }
+        }
+        if(ph==="ex-rest"){setPhase("work");return circuit.workTime;}
+        if(ph==="round-rest"){setExIdx(0);setPhase("work");return circuit.workTime;}
+        return 0;
+      });
+    },1000);
+    return()=>clearInterval(ivRef.current);
+  },[running]);
+
+  const ex=circuit.exercises[exIdx];
+  const totalEx=circuit.exercises.length;
+
+  const phaseColor={
+    warmup:"#FFB800","get-ready":"#FF4500",work:circuit.color,
+    "ex-rest":"#444","round-rest":"#444",done:"#00ff64",
+  }[phase]||"#fff";
+
+  const phaseLabel={
+    warmup:"WARM UP","get-ready":"GET READY",work:"WORK",
+    "ex-rest":"REST","round-rest":"ROUND REST",done:"DONE",
+  }[phase]||phase.toUpperCase();
+
+  const maxTime={
+    warmup:180,"get-ready":3,work:circuit.workTime,
+    "ex-rest":circuit.exRest,"round-rest":circuit.roundRest,done:1,
+  }[phase]||1;
+
+  const progress=Math.max(0,Math.min(1,(maxTime-timeLeft)/maxTime));
+
+  return(
+    <div style={{position:"fixed",inset:0,background:"#060606",zIndex:200,display:"flex",flexDirection:"column",alignItems:"center",overflowY:"auto",fontFamily:"'Bebas Neue',sans-serif"}}>
+      {/* Top bar */}
+      <div style={{width:"100%",maxWidth:480,display:"flex",justifyContent:"space-between",alignItems:"center",padding:"52px 20px 20px"}}>
+        <div>
+          <div style={{fontSize:11,color:"#333",letterSpacing:4,fontFamily:"'DM Sans',sans-serif"}}>{circuit.name}</div>
+          <div style={{fontSize:22,color:"white",letterSpacing:3}}>{circuit.subtitle.toUpperCase()}</div>
+        </div>
+        <button onClick={onClose} style={{background:"rgba(255,255,255,0.07)",border:"none",color:"#888",width:44,height:44,borderRadius:"50%",fontSize:18}}>✕</button>
+      </div>
+
+      {phase==="done"?(
+        <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:32,textAlign:"center"}}>
+          <div style={{fontSize:80,marginBottom:8}}>🔥</div>
+          <div style={{fontSize:72,color:"white",letterSpacing:4}}>BEAST</div>
+          <div style={{fontSize:72,color:circuit.color,letterSpacing:4,marginBottom:8}}>MODE</div>
+          <div style={{fontSize:16,color:"#555",fontFamily:"'DM Sans',sans-serif",marginBottom:32}}>Session crushed.</div>
+          <div style={{display:"flex",gap:24,marginBottom:40}}>
+            {[["ROUNDS",circuit.rounds],["MINS",Math.round(elapsed/60)],["SETS",totalSets]].map(([l,v])=>(
+              <div key={l} style={{textAlign:"center"}}>
+                <div style={{fontSize:36,color:"white"}}>{v}</div>
+                <div style={{fontSize:11,color:"#444",letterSpacing:3,fontFamily:"'DM Sans',sans-serif"}}>{l}</div>
+              </div>
+            ))}
+          </div>
+          <button onClick={onClose} style={{padding:"14px 40px",background:circuit.color,border:"none",color:"white",fontSize:22,letterSpacing:3,borderRadius:14,fontFamily:"'Bebas Neue',sans-serif"}}>BACK TO PROGRAM</button>
+        </div>
+      ):(
+        <>
+          {/* Phase badge */}
+          <div style={{background:`${phaseColor}22`,border:`1px solid ${phaseColor}44`,borderRadius:10,padding:"6px 20px",fontSize:14,color:phaseColor,letterSpacing:4,marginBottom:28}}>{phaseLabel}</div>
+
+          {/* Ring */}
+          <div style={{position:"relative",width:210,height:210,marginBottom:24}}>
+            <svg width="210" height="210" style={{transform:"rotate(-90deg)"}}>
+              <circle cx="105" cy="105" r="88" fill="none" stroke="#1a1a1a" strokeWidth="10"/>
+              <circle cx="105" cy="105" r="88" fill="none" stroke={phaseColor} strokeWidth="10"
+                strokeDasharray={circumference} strokeDashoffset={circumference*(1-progress)}
+                strokeLinecap="round" style={{transition:"stroke-dashoffset 0.6s linear,stroke 0.3s"}}/>
+            </svg>
+            <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
+              {phase==="get-ready"
+                ?<div style={{fontSize:80,color:"white",lineHeight:1}}>{timeLeft}</div>
+                :<div style={{fontSize:60,color:"white",lineHeight:1}}>{fmtTime(timeLeft)}</div>
+              }
+              {phase==="work"&&<div style={{fontSize:13,color:"#555",marginTop:4,fontFamily:"'DM Sans',sans-serif"}}>R{round}/{circuit.rounds}</div>}
+            </div>
+          </div>
+
+          {/* Current exercise */}
+          {phase!=="warmup"&&phase!=="get-ready"&&(
+            <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:18,padding:"18px 32px",textAlign:"center",marginBottom:16,width:"100%",maxWidth:360}}>
+              <div style={{fontSize:11,color:"#333",letterSpacing:3,fontFamily:"'DM Sans',sans-serif",marginBottom:6}}>
+                {phase==="work"?`EXERCISE ${exIdx+1}/${totalEx}`:phase==="ex-rest"?"NEXT UP":"NEXT ROUND STARTING"}
+              </div>
+              <div style={{fontSize:26,color:"white",letterSpacing:2}}>
+                {ex.icon} {phase==="ex-rest"&&exIdx+1<totalEx?circuit.exercises[exIdx+1].name:ex.name}
+              </div>
+            </div>
+          )}
+
+          {/* Warmup list */}
+          {phase==="warmup"&&(
+            <div style={{width:"100%",maxWidth:400,padding:"0 20px",marginBottom:16}}>
+              {WARMUP.map((w,i)=>(
+                <div key={i} style={{display:"flex",gap:14,padding:"12px 0",borderBottom:i<WARMUP.length-1?"1px solid rgba(255,255,255,0.05)":"none",alignItems:"center"}}>
+                  <span style={{fontSize:22}}>{w.icon}</span>
+                  <div>
+                    <div style={{fontSize:15,color:"white",fontFamily:"'DM Sans',sans-serif",fontWeight:500}}>{w.name}</div>
+                    <div style={{fontSize:12,color:"#444",fontFamily:"'DM Sans',sans-serif"}}>{w.detail}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Progress dots */}
+          {(phase==="work"||phase==="ex-rest")&&(
+            <div style={{display:"flex",gap:8,marginBottom:20}}>
+              {circuit.exercises.map((_,i)=>(
+                <div key={i} style={{width:i===exIdx?24:8,height:8,borderRadius:4,background:i<=exIdx?circuit.color:"#222",transition:"all 0.3s"}}/>
+              ))}
+            </div>
+          )}
+
+          {/* Controls */}
+          <div style={{display:"flex",gap:14,marginTop:8}}>
+            <button onClick={()=>setRunning(r=>!r)} style={{padding:"16px 48px",borderRadius:14,background:running?"rgba(255,255,255,0.08)":circuit.color,border:running?"1px solid rgba(255,255,255,0.1)":"none",color:"white",fontSize:26,letterSpacing:4,fontFamily:"'Bebas Neue',sans-serif"}}>
+              {running?"⏸ PAUSE":phase==="warmup"?"START":"▶ RESUME"}
+            </button>
+            {phase==="warmup"&&(
+              <button onClick={doSkipWarmup} style={{padding:"16px 18px",borderRadius:14,background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.1)",color:"#888",fontSize:14,fontFamily:"'DM Sans',sans-serif",letterSpacing:2}}>SKIP ⏭</button>
+            )}
+            {(phase==="work"||phase==="ex-rest"||phase==="round-rest")&&(
+              <button onClick={doSkip} style={{padding:"16px 18px",borderRadius:14,background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.1)",color:"#888",fontSize:14,fontFamily:"'DM Sans',sans-serif",letterSpacing:2}}>SKIP →</button>
+            )}
+          </div>
+
+          <div style={{marginTop:28,fontSize:11,color:"#222",letterSpacing:2,fontFamily:"'DM Sans',sans-serif",textAlign:"center",padding:"0 20px"}}>
+            REST: 15 SEC EX · 1 MIN ROUND · 2 MIN CIRCUIT
+          </div>
+        </>
+      )}
+    </div>
+  );
 }
 
-// ── UI ──
-function updateUI(){
-  const c=circuits[curCircuit];
-  const col=phase==='work'?c.color:phase==='ex-rest'?'#3b82f6':phase==='round-rest'?'#22c55e':'#a855f7';
-  document.getElementById('big-timer').style.color=col;
-  document.getElementById('state-lbl').style.color=col;
-  document.getElementById('big-timer').textContent=timeLeft;
-  document.getElementById('t-cname').textContent=c.short;
-  document.getElementById('t-round').textContent=`R${roundNum}/${totalRounds}`;
-  document.getElementById('rr-banner').classList.toggle('show',phase==='round-rest');
-  const labels={work:'WORK','ex-rest':'REST','round-rest':'ROUND REST','circuit-rest':'CIRCUIT REST'};
-  document.getElementById('state-lbl').textContent=labels[phase];
-  if(phase==='work'||phase==='ex-rest'){
-    const ex=c.exercises[exIdx];
-    document.getElementById('cur-ex').textContent=phase==='work'?ex.name:'REST';
-    document.getElementById('cur-desc').textContent=phase==='work'?ex.desc:`Next: ${c.exercises[Math.min(exIdx+1,c.exercises.length-1)].name}`;
-  } else if(phase==='round-rest'){
-    document.getElementById('cur-ex').textContent='ROUND REST';
-    document.getElementById('cur-desc').textContent=roundNum<totalRounds?`Round ${roundNum+1} coming up`:'Last round done!';
-  } else {
-    document.getElementById('cur-ex').textContent='CIRCUIT REST';
-    document.getElementById('cur-desc').textContent=fullQueue.length?`Next: ${circuits[fullQueue[0]].short}`:'Final circuit coming up';
-  }
-  const totDur={work:WORK,'ex-rest':EX_REST,'round-rest':ROUND_REST,'circuit-rest':CIRCUIT_REST};
-  const pct=((totDur[phase]-timeLeft)/totDur[phase])*100;
-  const fill=document.getElementById('phase-fill');
-  fill.style.width=pct+'%'; fill.style.background=col;
-  if(phase==='work'){
-    const ni=exIdx+1;
-    let nn=ni>=c.exercises.length
-      ?(roundNum<totalRounds?'Round rest (1 min)':isFullSession&&fullQueue.length?'Circuit rest (2 min)':'Circuit Done!')
-      :c.exercises[ni].name;
-    document.getElementById('next-name').textContent=nn;
-  }
-  document.getElementById('dots').innerHTML=c.exercises.map((_,i)=>{
-    let cls='dot';
-    if(i<exIdx) cls+=' done';
-    else if(i===exIdx&&phase==='work') cls+=' active';
-    return `<div class="${cls}"></div>`;
-  }).join('');
+// ── CIRCUIT CARD ──────────────────────────────────────────────────────────
+function CircuitCard({circuit,onStart}){
+  const [expanded,setExpanded]=useState(false);
+  return(
+    <div style={{background:"#0d0d0d",borderRadius:22,overflow:"hidden",marginBottom:14,border:"1px solid rgba(255,255,255,0.06)",boxShadow:`0 8px 40px ${circuit.glow}`}}>
+      <div style={{padding:"22px 22px 0",background:`linear-gradient(160deg,${circuit.glow} 0%,transparent 60%)`}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10}}>
+          <div style={{background:circuit.color,color:"#000",fontSize:13,fontWeight:800,padding:"4px 12px",borderRadius:8,letterSpacing:3,fontFamily:"'Bebas Neue',sans-serif"}}>CIRCUIT {circuit.id}</div>
+          <div style={{fontSize:11,color:"#444",letterSpacing:2,fontFamily:"'DM Sans',sans-serif"}}>{circuit.exercises.length} EX · {circuit.rounds} RDS</div>
+        </div>
+        <div style={{fontSize:30,color:"white",letterSpacing:2,fontFamily:"'Bebas Neue',sans-serif",lineHeight:1.1}}>{circuit.subtitle.toUpperCase()}</div>
+        <div style={{display:"flex",gap:10,marginTop:14,marginBottom:16,flexWrap:"wrap"}}>
+          {[{l:"WORK",v:`${circuit.workTime}s`},{l:"EX-REST",v:`${circuit.exRest}s`},{l:"RD-REST",v:`${circuit.roundRest}s`}].map(c=>(
+            <div key={c.l} style={{background:"rgba(255,255,255,0.04)",borderRadius:8,padding:"6px 14px",display:"flex",gap:8,alignItems:"center"}}>
+              <span style={{fontSize:10,color:"#444",letterSpacing:2,fontFamily:"'DM Sans',sans-serif"}}>{c.l}</span>
+              <span style={{fontSize:16,color:"white",fontFamily:"'Bebas Neue',sans-serif"}}>{c.v}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+      {expanded&&(
+        <div style={{padding:"0 22px 8px"}}>
+          <div style={{height:1,background:"rgba(255,255,255,0.05)",marginBottom:14}}/>
+          {circuit.exercises.map((ex,i)=>(
+            <div key={i} style={{display:"flex",alignItems:"center",gap:14,padding:"11px 0",borderBottom:i<circuit.exercises.length-1?"1px solid rgba(255,255,255,0.04)":"none"}}>
+              <div style={{width:32,height:32,borderRadius:10,background:`${circuit.color}22`,border:`1px solid ${circuit.color}44`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:16}}>{ex.icon}</div>
+              <div style={{fontSize:15,color:"white",fontFamily:"'DM Sans',sans-serif",fontWeight:500}}>{ex.name}</div>
+              <div style={{marginLeft:"auto",fontSize:11,color:"#333",fontFamily:"'DM Sans',sans-serif"}}>{circuit.workTime}s</div>
+            </div>
+          ))}
+        </div>
+      )}
+      <div style={{display:"flex",borderTop:"1px solid rgba(255,255,255,0.05)"}}>
+        <button onClick={()=>setExpanded(e=>!e)} style={{flex:1,padding:"14px",background:"transparent",border:"none",color:"#444",fontSize:11,letterSpacing:2,fontFamily:"'DM Sans',sans-serif"}}>
+          {expanded?"HIDE ▲":"EXERCISES ▼"}
+        </button>
+        <button onClick={()=>onStart(circuit)} style={{flex:2,padding:"14px",background:circuit.color,border:"none",color:"#000",fontSize:18,letterSpacing:3,fontFamily:"'Bebas Neue',sans-serif",fontWeight:800}}>START →</button>
+      </div>
+    </div>
+  );
 }
-function togglePause(){ paused=!paused; document.getElementById('pause-btn').textContent=paused?'▶ RESUME':'⏸ PAUSE'; }
-function skipCurrent(){ timeLeft=1; }
-function stopTimer(){ clearInterval(interval); clearInterval(cdInt); showTab('home'); }
 
-// ── COMPLETE ──
-function finishSession(){
-  clearInterval(interval);
-  const mins=Math.round((Date.now()-sessionStart)/60000);
-  const c=circuits[curCircuit];
-  const data={name:isFullSession?'Full Session':c.name,sets:setsTotal,mins:Math.max(1,mins),rounds:roundNum};
-  saveSession(data); beepComplete();
-  document.getElementById('comp-sub').textContent=isFullSession?'Full session CRUSHED. You earned it.':c.name+' — annihilated.';
-  document.getElementById('cs-r').textContent=roundNum;
-  document.getElementById('cs-t').textContent=Math.max(1,mins);
-  document.getElementById('cs-s').textContent=setsTotal;
-  sessionStart=null; setScreen('complete');
+// ── STATS ─────────────────────────────────────────────────────────────────
+function StatsTab({stats}){
+  const thisWeek=stats.sessions.slice(-7);
+  const maxSets=Math.max(...thisWeek.map(s=>s.sets),1);
+  return(
+    <div style={{padding:"0 16px 100px"}}>
+      <div style={{fontSize:36,color:"white",fontFamily:"'Bebas Neue',sans-serif",letterSpacing:4,marginBottom:4}}>YOUR STATS</div>
+      <div style={{fontSize:12,color:"#333",letterSpacing:3,fontFamily:"'DM Sans',sans-serif",marginBottom:24}}>ALL TIME</div>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:24}}>
+        {[{l:"SESSIONS DONE",v:stats.totalSessions,icon:"🏋️"},{l:"DAY STREAK 🔥",v:stats.streak,icon:"📅"},{l:"TOTAL SETS",v:stats.totalSets,icon:"⚡"},{l:"TOTAL MINUTES",v:stats.totalMinutes,icon:"⏱️"}].map(s=>(
+          <div key={s.l} style={{background:"#0d0d0d",borderRadius:18,padding:"20px",border:"1px solid rgba(255,255,255,0.05)"}}>
+            <div style={{fontSize:28,marginBottom:4}}>{s.icon}</div>
+            <div style={{fontSize:40,color:"white",fontFamily:"'Bebas Neue',sans-serif",lineHeight:1}}>{s.v}</div>
+            <div style={{fontSize:10,color:"#333",letterSpacing:2,marginTop:4,fontFamily:"'DM Sans',sans-serif"}}>{s.l}</div>
+          </div>
+        ))}
+      </div>
+      <div style={{background:"#0d0d0d",borderRadius:18,padding:"20px",border:"1px solid rgba(255,255,255,0.05)",marginBottom:20}}>
+        <div style={{fontSize:14,color:"#444",letterSpacing:3,fontFamily:"'DM Sans',sans-serif",marginBottom:16}}>THIS WEEK</div>
+        {thisWeek.length===0
+          ?<div style={{fontSize:13,color:"#333",fontFamily:"'DM Sans',sans-serif"}}>No sessions yet — get after it! 🔥</div>
+          :<div style={{display:"flex",gap:8,alignItems:"flex-end",height:80}}>
+            {thisWeek.map((s,i)=>(
+              <div key={i} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:4}}>
+                <div style={{width:"100%",background:"#FF4500",borderRadius:4,height:`${Math.round((s.sets/maxSets)*64)+4}px`}}/>
+                <div style={{fontSize:9,color:"#333",fontFamily:"'DM Sans',sans-serif"}}>{new Date(s.date).toLocaleDateString("en",{weekday:"short"}).toUpperCase()}</div>
+              </div>
+            ))}
+          </div>
+        }
+      </div>
+      <div style={{fontSize:14,color:"#333",letterSpacing:3,fontFamily:"'DM Sans',sans-serif",marginBottom:12}}>RECENT SESSIONS</div>
+      {stats.sessions.length===0
+        ?<div style={{background:"#0d0d0d",borderRadius:18,padding:"24px",border:"1px solid rgba(255,255,255,0.05)",textAlign:"center",fontSize:13,color:"#333",fontFamily:"'DM Sans',sans-serif"}}>Complete a session to see history here</div>
+        :[...stats.sessions].reverse().slice(0,5).map((s,i)=>(
+          <div key={i} style={{background:"#0d0d0d",borderRadius:14,padding:"16px 20px",border:"1px solid rgba(255,255,255,0.05)",marginBottom:10,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+            <div>
+              <div style={{fontSize:16,color:"white",fontFamily:"'Bebas Neue',sans-serif",letterSpacing:2}}>{s.label}</div>
+              <div style={{fontSize:11,color:"#444",fontFamily:"'DM Sans',sans-serif",marginTop:2}}>{new Date(s.date).toLocaleDateString("en",{month:"short",day:"numeric"})}</div>
+            </div>
+            <div style={{textAlign:"right"}}>
+              <div style={{fontSize:20,color:"#FF4500",fontFamily:"'Bebas Neue',sans-serif"}}>{s.sets} SETS</div>
+              <div style={{fontSize:11,color:"#333",fontFamily:"'DM Sans',sans-serif"}}>{s.minutes} MIN</div>
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  );
 }
-function goHome(){ refreshHome(); showTab('home'); }
 
-// ── INIT ──
-window.addEventListener('load',()=>{ refreshHome(); setTimeout(()=>setScreen('home'),2200); });
+// ── APP ───────────────────────────────────────────────────────────────────
+function App(){
+  const [tab,setTab]=useState("home");
+  const [activeCircuit,setActiveCircuit]=useState(null);
+  const [fullSession,setFullSession]=useState(false);
+  const [fullIdx,setFullIdx]=useState(0);
+  const [stats,setStats]=useState({totalSessions:0,streak:0,totalSets:0,totalMinutes:0,sessions:[]});
+  const [streakToday,setStreakToday]=useState(false);
+
+  const handleComplete=(circuit,result)=>{
+    const todayStr=new Date().toDateString();
+    setStats(prev=>{
+      const isNewDay=prev.sessions.length===0||new Date(prev.sessions[prev.sessions.length-1].date).toDateString()!==todayStr;
+      return{
+        totalSessions:prev.totalSessions+1,
+        streak:isNewDay&&!streakToday?prev.streak+1:prev.streak,
+        totalSets:prev.totalSets+result.sets,
+        totalMinutes:prev.totalMinutes+result.minutes,
+        sessions:[...prev.sessions,{label:`${circuit.name} — ${circuit.subtitle}`,date:new Date().toISOString(),sets:result.sets,minutes:result.minutes}],
+      };
+    });
+    if(!streakToday)setStreakToday(true);
+    setActiveCircuit(null);
+    if(fullSession&&fullIdx<CIRCUITS.length-1){
+      setTimeout(()=>{const ni=fullIdx+1;setFullIdx(ni);setActiveCircuit(CIRCUITS[ni]);},400);
+    } else {
+      setFullSession(false);setFullIdx(0);
+    }
+  };
+
+  const startFull=()=>{setFullSession(true);setFullIdx(0);setActiveCircuit(CIRCUITS[0]);};
+
+  return(
+    <div style={{minHeight:"100vh",background:"#080808",fontFamily:"'DM Sans',sans-serif",maxWidth:480,margin:"0 auto",position:"relative"}}>
+
+      {activeCircuit&&<Timer circuit={activeCircuit} onClose={()=>{setActiveCircuit(null);setFullSession(false);setFullIdx(0);}} onComplete={r=>handleComplete(activeCircuit,r)}/>}
+
+      {/* HEADER */}
+      <div style={{padding:"52px 20px 20px",background:"linear-gradient(180deg,#111 0%,#080808 100%)",position:"sticky",top:0,zIndex:100,borderBottom:"1px solid rgba(255,255,255,0.05)"}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          <div>
+            <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:2}}>
+              <div style={{width:8,height:8,borderRadius:"50%",background:"#FF4500",boxShadow:"0 0 8px #FF4500"}}/>
+              <span style={{fontSize:10,color:"#FF4500",letterSpacing:4,fontFamily:"'DM Sans',sans-serif"}}>⚡ ELITE</span>
+            </div>
+            <div style={{fontSize:40,color:"white",fontFamily:"'Bebas Neue',sans-serif",letterSpacing:5,lineHeight:1}}>IRON BELL</div>
+          </div>
+          <div style={{textAlign:"right",background:"rgba(255,69,0,0.08)",border:"1px solid rgba(255,69,0,0.2)",borderRadius:14,padding:"10px 16px"}}>
+            <div style={{fontSize:24,color:"white",fontFamily:"'Bebas Neue',sans-serif"}}>🔥 {stats.streak}</div>
+            <div style={{fontSize:10,color:"#444",letterSpacing:2,fontFamily:"'DM Sans',sans-serif"}}>DAY STREAK</div>
+          </div>
+        </div>
+      </div>
+
+      {/* CONTENT */}
+      <div style={{paddingBottom:100}}>
+        {tab==="home"&&(
+          <div style={{padding:"24px 16px 0"}}>
+            {/* Hero */}
+            <div style={{background:"linear-gradient(135deg,#111 0%,#0d0d0d 100%)",borderRadius:22,padding:"24px",marginBottom:24,border:"1px solid rgba(255,255,255,0.06)",position:"relative",overflow:"hidden"}}>
+              <div style={{position:"absolute",top:-30,right:-30,width:140,height:140,borderRadius:"50%",background:"radial-gradient(circle,rgba(255,69,0,0.12) 0%,transparent 70%)"}}/>
+              <div style={{fontSize:11,color:"#444",letterSpacing:4,marginBottom:8,fontFamily:"'DM Sans',sans-serif"}}>ELITE KETTLEBELL PROTOCOL</div>
+              <div style={{fontSize:26,color:"white",fontFamily:"'Bebas Neue',sans-serif",letterSpacing:3,marginBottom:6}}>3-CIRCUIT ADVANCED PROGRAM</div>
+              <div style={{fontSize:13,color:"#555",fontFamily:"'DM Sans',sans-serif",marginBottom:20,lineHeight:1.6}}>Fat loss + muscle hypertrophy. 3 circuits, 3 rounds each.</div>
+              <div style={{display:"flex",gap:20,marginBottom:20}}>
+                {[["SESSIONS",stats.totalSessions],["TOTAL SETS",stats.totalSets],["MINUTES",stats.totalMinutes]].map(([l,v])=>(
+                  <div key={l}>
+                    <div style={{fontSize:28,color:"white",fontFamily:"'Bebas Neue',sans-serif"}}>{v}</div>
+                    <div style={{fontSize:10,color:"#333",letterSpacing:2,fontFamily:"'DM Sans',sans-serif"}}>{l}</div>
+                  </div>
+                ))}
+              </div>
+              <button onClick={startFull} style={{width:"100%",padding:"16px",background:"#FF4500",border:"none",color:"white",fontSize:22,letterSpacing:4,borderRadius:14,fontFamily:"'Bebas Neue',sans-serif"}}>▶ START FULL SESSION</button>
+            </div>
+
+            {/* Load guide */}
+            <div style={{background:"rgba(255,184,0,0.06)",border:"1px solid rgba(255,184,0,0.15)",borderRadius:14,padding:"14px 18px",marginBottom:24,fontSize:12,color:"#886600",fontFamily:"'DM Sans',sans-serif",lineHeight:1.7}}>
+              <span style={{color:"#FFB800",fontWeight:600}}>LOAD: </span>Men 16–24 kg · Women 12–16 kg
+              &nbsp;&nbsp;|&nbsp;&nbsp;
+              <span style={{color:"#FFB800",fontWeight:600}}>REST: </span>15 sec ex · 1 min round · 2 min circuit
+            </div>
+
+            <div style={{fontSize:12,color:"#333",letterSpacing:4,marginBottom:16,fontFamily:"'DM Sans',sans-serif"}}>TODAY'S CIRCUITS</div>
+            {CIRCUITS.map(c=><CircuitCard key={c.id} circuit={c} onStart={setActiveCircuit}/>)}
+          </div>
+        )}
+        {tab==="stats"&&<StatsTab stats={stats}/>}
+      </div>
+
+      {/* BOTTOM NAV */}
+      <div style={{position:"fixed",bottom:0,left:"50%",transform:"translateX(-50%)",width:"100%",maxWidth:480,background:"rgba(6,6,6,0.96)",backdropFilter:"blur(24px)",borderTop:"1px solid rgba(255,255,255,0.05)",display:"flex",padding:"14px 0 28px"}}>
+        {[{id:"home",label:"HOME",icon:"🏠"},{id:"stats",label:"STATS",icon:"📊"}].map(t=>(
+          <button key={t.id} onClick={()=>setTab(t.id)} style={{flex:1,background:"transparent",border:"none",color:tab===t.id?"#FF4500":"#2a2a2a",display:"flex",flexDirection:"column",alignItems:"center",gap:5}}>
+            <span style={{fontSize:24}}>{t.icon}</span>
+            <span style={{fontSize:10,letterSpacing:3,fontFamily:"'DM Sans',sans-serif",fontWeight:600}}>{t.label}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
 </script>
 </body>
 </html>
