@@ -27,10 +27,10 @@ const CIRCUITS = [
     id:"A", name:"Circuit A", subtitle:"Power & Pull",
     color:"#FF4500", glow:"rgba(255,69,0,0.18)",
     exercises:[
-      {name:"KB Push-Ups",icon:"💪"},
       {name:"KB Renegade Row",icon:"🔥"},
-      {name:"KB Press + Jumping Jacks",icon:"⚡"},
-      {name:"Shoulder Raise + Jumping Jacks",icon:"🏋️"},
+      {name:"KB Push-Ups",icon:"💪"},
+      {name:"Shoulder Press + Jacks",icon:"⚡"},
+      {name:"KB Swing Squats",icon:"🏋️"},
     ],
     rounds:3, workTime:60, exRest:15, roundRest:60,
   },
@@ -201,7 +201,7 @@ function Timer({circuit, onClose, onComplete}){
 
   const phaseColor={
     warmup:"#FFB800","get-ready":"#FF4500",work:circuit.color,
-    "ex-rest":"#00C853","round-rest":"#00C853",done:"#00ff64",
+    "ex-rest":"#444","round-rest":"#444",done:"#00ff64",
   }[phase]||"#fff";
 
   const phaseLabel={
@@ -272,7 +272,7 @@ function Timer({circuit, onClose, onComplete}){
                 {phase==="work"?`EXERCISE ${exIdx+1}/${totalEx}`:phase==="ex-rest"?"NEXT UP":"NEXT ROUND STARTING"}
               </div>
               <div style={{fontSize:26,color:"white",letterSpacing:2}}>
-                {ex.icon} {phase==="ex-rest"&&exIdx+1<totalEx?circuit.exercises[exIdx+1].name:ex.name}
+                {ex.icon} {ex.name}
               </div>
             </div>
           )}
